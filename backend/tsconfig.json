@@ -1,6 +1,6 @@
-  /** SOURCE : https://www.robinwieruch.de/typescript-node-js/ **/
-  
-  {
+/** SOURCE : https://www.robinwieruch.de/typescript-node-js/ **/
+
+{
   "compilerOptions": {
     /* Modern JavaScript & Browser Compatibility: */
     "target": "ESNext", // Uses the latest ECMAScript features for modern JavaScript support
@@ -29,7 +29,7 @@
     "declaration": false, // [OVERRIDDEN] Generates `.d.ts` files for type definitions
     "allowSyntheticDefaultImports": true, // Allows default imports for CommonJS modules
     "allowImportingTsExtensions": false, // [OVERRIDDEN] Allows importing `.ts` files with their extensions
-    "verbatimModuleSyntax": true, // Keeps the `import`/`export` syntax as-is without transformation
+    "verbatimModuleSyntax": false, // [OVERRIDDEN] Keeps the `import`/`export` syntax as-is without transformation
 
     // Include modern ECMAScript (ES2022) and DOM APIs for frontend
     "lib": ["ES2022"]

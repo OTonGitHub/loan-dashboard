@@ -1,0 +1,54 @@
+@host = http://localhost:3000
+
+### Get all loans
+GET {{host}}/loans
+Accept: application/json
+
+# Expected: 200 OK and a JSON array (should contain >= 10 sample loans)
+
+### Create loan (valid)
+POST {{host}}/loans
+Content-Type: application/json
+
+{
+  "loanNumber": "LN-011",
+  "amount": 50000,
+  "startDate": "2025-01-01",
+  "endDate": "2027-01-01",
+  "emi": 2000,
+  "outstandingAmount": 50000,
+  "overdueAmount": 0
+}
+
+# Expected: 201 Created and JSON { "success": true }
+
+### Create loan (invalid - negative amount)
+POST {{host}}/loans
+Content-Type: application/json
+
+{
+  "loanNumber": "LN-012",
+  "amount": -1000,
+  "startDate": "2025-01-01",
+  "endDate": "2027-01-01",
+  "emi": 0,
+  "outstandingAmount": 0,
+  "overdueAmount": 0
+}
+
+# Expected: 400 Bad Request and validation errors
+
+### Create loan (invalid - missing loanNumber)
+POST {{host}}/loans
+Content-Type: application/json
+
+{
+  "amount": 10000,
+  "startDate": "2025-01-01",
+  "endDate": "2026-01-01",
+  "emi": 800,
+  "outstandingAmount": 10000,
+  "overdueAmount": 0
+}
+
+# Expected: 400 Bad Request and validation errors
