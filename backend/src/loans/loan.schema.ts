@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
-export const loanNumberParamSchema = z.object({
-  loanNumber: z.string().regex(/^LN-\d+$/, 'loanNumber must look like LN-123'),
-});
+const loanNumberPattern = /^LN-\d+$/;
+const loanNumberMessage = 'loanNumber must look like LN-123';
+const loanNumberSchema = z.string().regex(loanNumberPattern, loanNumberMessage);
 
 const dateOnly = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format');
 
-export const loanSchema = z
+const loanSchema = z
   .object({
-    loanNumber: z.string().min(1, 'loanNumber is required'),
+    loanNumber: loanNumberSchema,
     amount: z.coerce.number().positive('amount must be greater than 0'),
     startDate: dateOnly,
     endDate: dateOnly,
@@ -69,4 +69,11 @@ export const loanSchema = z
     }
   });
 
-export type LoanInput = z.infer<typeof loanSchema>;
+export const loanValidation = {
+  body: loanSchema,
+  params: {
+    loanNumber: z.object({ loanNumber: loanNumberSchema }),
+  },
+};
+
+export type LoanCreateDto = z.output<typeof loanSchema>;

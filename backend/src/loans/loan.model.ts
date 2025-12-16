@@ -1,9 +1,11 @@
+// Domain entity (could map to a DB record)
 export interface Loan {
-    loanNumber: string
-    amount: number
-    startDate: string
-    endDate: string
-    emi: number
-    outstandingAmount: number
-    overdueAmount: number
+  id: string;
+  loanNumber: string;
+  amount: number;
+  startDate: string;
+  endDate: string;
+  emi: number;
+  outstandingAmount: number;
+  overdueAmount: number;
 }
