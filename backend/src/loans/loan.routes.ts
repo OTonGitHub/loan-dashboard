@@ -3,15 +3,14 @@ import { zValidator } from '@hono/zod-validator';
 import { HTTPException } from 'hono/http-exception';
 import { LoanService } from './loan.service.js';
 import { loanValidation, type LoanCreateDto } from './loan.schema.js';
-import { Loan } from './loan.model.js';
+import { toLoanResponseDto } from './loan.dto.js';
 
 export function createLoanRoutes(service: LoanService) {
   const router = new Hono();
-  const toPublicLoan = ({ id, ...rest }: Loan) => rest;
-
+  
   router.get('/', async (c) => {
     const loans = await service.getLoans();
-    return c.json(loans.map(toPublicLoan));
+    return c.json(loans.map(toLoanResponseDto));
   });
 
   router.get(
@@ -32,7 +31,7 @@ export function createLoanRoutes(service: LoanService) {
     async (c) => {
       const { loanNumber } = c.req.valid('param');
       const loan = await service.getLoan(loanNumber);
-      return c.json(toPublicLoan(loan));
+      return c.json(toLoanResponseDto(loan));
     }
   );
 

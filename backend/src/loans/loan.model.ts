@@ -1,4 +1,4 @@
-// Domain entity (could map to a DB record)
+// Domain entity (Can map to a DB record)
 export interface Loan {
   id: string;
   loanNumber: string;
