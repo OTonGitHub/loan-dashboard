@@ -9,6 +9,8 @@ type UseLoansResult = {
   createLoan: (payload: NewLoanPayload) => Promise<void>;
 };
 
+type FieldedError = Error & { field?: string };
+
 const apiBase =
   import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || 'http://localhost:3000/api/v1';
 
@@ -55,7 +57,10 @@ export function useLoans(): UseLoansResult {
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         const message = body?.message || body?.errors?.[0]?.message || 'Failed to create loan';
-        throw new Error(message);
+        const field = body?.errors?.[0]?.field as string | undefined;
+        const err = new Error(message) as FieldedError;
+        err.field = field;
+        throw err;
       }
 
       await fetchLoans();
