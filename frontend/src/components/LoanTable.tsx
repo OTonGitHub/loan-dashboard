@@ -2,9 +2,11 @@ import type { Loan } from '../types/loan';
 
 type LoanTableProps = {
   loans: Loan[];
+  loading?: boolean;
+  error?: string | null;
 };
 
-export function LoanTable({ loans }: LoanTableProps) {
+export function LoanTable({ loans, loading, error }: LoanTableProps) {
   return (
     <section className="bg-base-100 shadow-sm rounded-2xl overflow-hidden">
       <div className="p-4 border-b border-base-200 flex items-center justify-between">
@@ -30,23 +32,48 @@ export function LoanTable({ loans }: LoanTableProps) {
             </tr>
           </thead>
           <tbody>
-            {loans.map((loan) => (
-              <tr key={loan.loanNumber}>
-                <td className="font-medium">{loan.loanNumber}</td>
-                <td>{loan.amountDisplay}</td>
-                <td>{loan.emiDisplay}</td>
-                <td>{loan.startDate}</td>
-                <td>{loan.endDate}</td>
-                <td>{loan.outstandingDisplay}</td>
-                <td>
-                  {loan.overdueAmount > 0 ? (
-                    <span className="badge badge-error badge-outline">{loan.overdueDisplay}</span>
-                  ) : (
-                    <span className="badge badge-success badge-outline">On time</span>
-                  )}
+            {loading ? (
+              <tr>
+                <td colSpan={7}>
+                  <div className="flex items-center gap-2 py-6 justify-center text-sm text-base-content/70">
+                    <span className="loading loading-spinner loading-sm" />
+                    Loading loans...
+                  </div>
                 </td>
               </tr>
-            ))}
+            ) : error ? (
+              <tr>
+                <td colSpan={7}>
+                  <div className="alert alert-error my-4">
+                    <span>{error}</span>
+                  </div>
+                </td>
+              </tr>
+            ) : loans.length === 0 ? (
+              <tr>
+                <td colSpan={7}>
+                  <div className="py-6 text-center text-sm text-base-content/70">No loans to display.</div>
+                </td>
+              </tr>
+            ) : (
+              loans.map((loan) => (
+                <tr key={loan.loanNumber}>
+                  <td className="font-medium">{loan.loanNumber}</td>
+                  <td>{loan.amountDisplay}</td>
+                  <td>{loan.emiDisplay}</td>
+                  <td>{loan.startDate}</td>
+                  <td>{loan.endDate}</td>
+                  <td>{loan.outstandingDisplay}</td>
+                  <td>
+                    {loan.overdueAmount > 0 ? (
+                      <span className="badge badge-error badge-outline">{loan.overdueDisplay}</span>
+                    ) : (
+                      <span className="badge badge-success badge-outline">On time</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

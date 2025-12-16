@@ -5,6 +5,7 @@
 import { Hono } from 'hono';
 import { prettyJSON } from 'hono/pretty-json';
 import { HTTPException } from 'hono/http-exception';
+import { cors } from 'hono/cors';
 
 import { InMemoryLoanRepository } from './loans/loan.memory.js';
 import { LoanService } from './loans/loan.service.js';
@@ -17,6 +18,14 @@ export function createApp() {
   const loanRepository = new InMemoryLoanRepository();
   const loanService = new LoanService(loanRepository);
 
+  app.use(
+    '*',
+    cors({
+      origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+      allowMethods: ['GET', 'POST', 'OPTIONS'],
+      allowHeaders: ['Content-Type'],
+    })
+  );
   app.use('*', prettyJSON());
   app.route('/api/v1/loans', createLoanRoutes(loanService));
 
