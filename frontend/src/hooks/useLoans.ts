@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
-import type { Loan } from '../types/loan';
+import { useCallback, useEffect, useState } from 'react';
+import type { Loan, NewLoanPayload } from '../types/loan';
 
 type UseLoansResult = {
   loans: Loan[];
   loading: boolean;
   error: string | null;
+  refetch: () => Promise<void>;
+  createLoan: (payload: NewLoanPayload) => Promise<void>;
 };
 
 const apiBase =
@@ -15,33 +17,51 @@ export function useLoans(): UseLoansResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchLoans = useCallback(async () => {
     const controller = new AbortController();
-
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch(`${apiBase}/loans`, { signal: controller.signal });
-        if (!res.ok) {
-          throw new Error(`Request failed (${res.status})`);
-        }
-        const data = (await res.json()) as Loan[];
-        setLoans(data);
-      } catch (err) {
-        if (controller.signal.aborted) return;
-        setError(err instanceof Error ? err.message : 'Failed to load loans');
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`${apiBase}/loans`, { signal: controller.signal });
+      if (!res.ok) {
+        throw new Error(`Request failed (${res.status})`);
+      }
+      const data = (await res.json()) as Loan[];
+      setLoans(data);
+    } catch (err) {
+      if (controller.signal.aborted) return;
+      setError(err instanceof Error ? err.message : 'Failed to load loans');
+    } finally {
+      if (!controller.signal.aborted) {
+        setLoading(false);
       }
     }
-
-    load();
-
-    return () => controller.abort();
   }, []);
 
-  return { loans, loading, error };
+  useEffect(() => {
+    fetchLoans();
+  }, [fetchLoans]);
+
+  const createLoan = useCallback(
+    async (payload: NewLoanPayload) => {
+      const res = await fetch(`${apiBase}/loans`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const message = body?.message || body?.errors?.[0]?.message || 'Failed to create loan';
+        throw new Error(message);
+      }
+
+      await fetchLoans();
+    },
+    [fetchLoans]
+  );
+
+  return { loans, loading, error, refetch: fetchLoans, createLoan };
 }
