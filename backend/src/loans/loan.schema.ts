@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 const loanNumberPattern = /^LN-\d+$/;
 const loanNumberMessage = 'loanNumber must look like LN-123';
-const loanNumberSchema = z.string().regex(loanNumberPattern, loanNumberMessage);
+const loanNumberSchema = z
+  .string()
+  .min(1, 'loanNumber is required')
+  .regex(loanNumberPattern, loanNumberMessage);
 
 const dateOnly = z
   .string()
@@ -69,10 +72,12 @@ const loanSchema = z
     }
   });
 
+const loanNumberParamSchema = z.object({ loanNumber: loanNumberSchema });
+
 export const loanValidation = {
   body: loanSchema,
   params: {
-    loanNumber: z.object({ loanNumber: loanNumberSchema }),
+    loanNumber: loanNumberParamSchema,
   },
 };
 
