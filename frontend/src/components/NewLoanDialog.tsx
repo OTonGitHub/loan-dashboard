@@ -71,7 +71,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="text"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.loanNumber}
               onChange={handleChange('loanNumber')}
               placeholder="LN-011"
@@ -84,7 +84,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="number"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.amount}
               onChange={handleChange('amount')}
               min={0}
@@ -97,7 +97,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="number"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.emi}
               onChange={handleChange('emi')}
               min={0}
@@ -110,7 +110,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="number"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.outstandingAmount}
               onChange={handleChange('outstandingAmount')}
               min={0}
@@ -123,7 +123,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="number"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.overdueAmount}
               onChange={handleChange('overdueAmount')}
               min={0}
@@ -136,7 +136,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="date"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.startDate}
               onChange={handleChange('startDate')}
               required
@@ -148,7 +148,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
             <input
               type="date"
-              className="input input-bordered"
+              className="input input-bordered focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               value={form.endDate}
               onChange={handleChange('endDate')}
               required
