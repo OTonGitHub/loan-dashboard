@@ -10,6 +10,14 @@ export class LoanService {
         return this.repo.findAll()
     }
 
+    async getLoan(loanNumber: string): Promise<Loan> {
+        const loan = await this.repo.findByLoanNumber(loanNumber)
+        if (!loan) {
+            throw new HTTPException(404, { message: "Loan not found" })
+        }
+        return loan
+    }
+
     // COMMAND
     async craeteLoan(loan: Loan): Promise<void> {
         // payload validation handled at the route; service focuses on repo/domain state checks

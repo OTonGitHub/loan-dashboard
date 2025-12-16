@@ -6,6 +6,12 @@ export class InMemoryLoanRepository implements LoanRepository {
     // actually synchrnnous, but ORM will probably be async
     return this.loans;
   }
+
+  async findByLoanNumber(loanNumber: string): Promise<Loan | null> {
+    const loan = this.loans.find((l) => l.loanNumber === loanNumber);
+    return loan ?? null;
+  }
+
   async create(loan: Loan): Promise<void> {
     // '''
     this.loans.push(loan);

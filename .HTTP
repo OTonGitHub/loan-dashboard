@@ -6,6 +6,12 @@ Accept: application/json
 
 # Expected: 200 OK and a JSON array (should contain >= 10 sample loans)
 
+### Get single loan (valid)
+GET {{host}}/loans/LN-001
+Accept: application/json
+
+# Expected: 200 OK and an object with loanNumber = "LN-001"
+
 ### Create loan (valid)
 POST {{host}}/loans
 Content-Type: application/json
@@ -52,3 +58,15 @@ Content-Type: application/json
 }
 
 # Expected: 400 Bad Request and validation errors
+
+### Get single loan (not found)
+GET {{host}}/loans/LN-999
+Accept: application/json
+
+# Expected: 404 Not Found when loanNumber does not exist
+
+### Get single loan (invalid format)
+GET {{host}}/loans/LN-ABC
+Accept: application/json
+
+# Expected: 400 Bad Request because loanNumber must match LN-<digits>

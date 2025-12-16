@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+export const loanNumberParamSchema = z.object({
+  loanNumber: z.string().regex(/^LN-\d+$/, 'loanNumber must look like LN-123'),
+});
+
 const dateOnly = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format');
