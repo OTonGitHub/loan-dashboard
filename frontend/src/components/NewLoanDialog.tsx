@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { NewLoanPayload } from '../types/loan';
 import type { FieldError } from '../hooks/useLoans';
 
@@ -33,30 +33,32 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorList, setErrorList] = useState<FieldError[]>([]);
-  const [errorField, setErrorField] = useState<keyof NewLoanPayload | null>(null);
 
-  const loanNumberRef = useRef<HTMLInputElement | null>(null);
-  const amountRef = useRef<HTMLInputElement | null>(null);
-  const emiRef = useRef<HTMLInputElement | null>(null);
-  const outstandingRef = useRef<HTMLInputElement | null>(null);
-  const overdueRef = useRef<HTMLInputElement | null>(null);
-  const startDateRef = useRef<HTMLInputElement | null>(null);
-  const endDateRef = useRef<HTMLInputElement | null>(null);
+  const refs = useRef<Record<keyof NewLoanPayload, HTMLInputElement | null>>({
+    loanNumber: null,
+    amount: null,
+    emi: null,
+    outstandingAmount: null,
+    overdueAmount: null,
+    startDate: null,
+    endDate: null,
+  });
 
-  const handleChange = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errorField === field) {
-      setErrorField(null);
-    }
-  };
+  const handleChange =
+    (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setForm((prev) => ({ ...prev, [field]: value }));
+      // Clear any field-specific errors when user edits that field
+      if (errorList.some((er) => er.field === field)) {
+        setErrorList((prev) => prev.filter((er) => er.field !== field));
+      }
+    };
 
   const reset = () => {
     setForm(initialForm);
     setError(null);
     setErrorList([]);
     setSubmitting(false);
-    setErrorField(null);
   };
 
   useEffect(() => {
@@ -64,20 +66,6 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
       reset();
     }
   }, [open]);
-
-  useEffect(() => {
-    if (!errorField) return;
-    const refMap: Partial<Record<keyof NewLoanPayload, RefObject<HTMLInputElement | null>>> = {
-      loanNumber: loanNumberRef,
-      amount: amountRef,
-      emi: emiRef,
-      outstandingAmount: outstandingRef,
-      overdueAmount: overdueRef,
-      startDate: startDateRef,
-      endDate: endDateRef,
-    };
-    refMap[errorField]?.current?.focus();
-  }, [errorField]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,29 +92,27 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
           : undefined;
       const errors =
         err && typeof err === 'object' && 'errors' in err
-          ? ((err as { errors?: FieldError[] }).errors ?? [])
+          ? (err as { errors?: FieldError[] }).errors ?? []
           : [];
 
-      setError(errors.length > 0 ? null : err instanceof Error ? err.message : 'Failed to create loan');
+      setError(
+        errors.length > 0
+          ? null
+          : err instanceof Error
+          ? err.message
+          : 'Failed to create loan'
+      );
       setErrorList(errors);
 
-      const refMap: Partial<Record<keyof NewLoanPayload, RefObject<HTMLInputElement | null>>> = {
-        loanNumber: loanNumberRef,
-        amount: amountRef,
-        emi: emiRef,
-        outstandingAmount: outstandingRef,
-        overdueAmount: overdueRef,
-        startDate: startDateRef,
-        endDate: endDateRef,
-      };
-
-      const firstField = field || (errors.find((e) => e.field)?.field as keyof NewLoanPayload | undefined) || null;
+      const firstField =
+        field ||
+        (errors.find((e) => e.field)?.field as
+          | keyof NewLoanPayload
+          | undefined) ||
+        null;
       if (firstField) {
-        setErrorField(null);
-        setTimeout(() => {
-          setErrorField(firstField);
-          refMap[firstField]?.current?.focus();
-        }, 0);
+        // focus the first invalid field
+        setTimeout(() => refs.current[firstField]?.focus(), 0);
       }
     } finally {
       setSubmitting(false);
@@ -139,7 +125,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
 
   const inputClass = (field: keyof NewLoanPayload) =>
     `input input-bordered focus:outline-none ${
-      errorField === field || errorFields.has(field)
+      errorFields.has(field)
         ? 'border-error focus:border-error focus:ring-2 focus:ring-error/40'
         : 'focus:border-primary focus:ring-2 focus:ring-primary/30'
     }`;
@@ -155,21 +141,29 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   };
 
   return (
-    <dialog className="modal" open={open}>
-      <div className="modal-box max-w-2xl">
-        <h3 className="font-semibold text-lg mb-2">New Loan</h3>
-        <p className="text-sm text-base-content/70 mb-4">Create a new loan facility.</p>
+    <dialog className='modal' open={open}>
+      <div className='modal-box max-w-2xl'>
+        <h3 className='font-semibold text-lg mb-2'>New Loan</h3>
+        <p className='text-sm text-base-content/70 mb-4'>
+          Create a new loan facility.
+        </p>
         {(error || errorList.length > 0) && (
-          <div className="alert alert-error mb-4">
-            <div className="flex flex-col gap-1">
-              <span className="font-semibold">
-                {errorList.length > 0 ? 'Please fix the fields below' : error || 'Please fix the fields below'}
+          <div className='alert alert-error mb-4'>
+            <div className='flex flex-col gap-1'>
+              <span className='font-semibold'>
+                {errorList.length > 0
+                  ? 'Please fix the fields below'
+                  : error || 'Please fix the fields below'}
               </span>
               {errorList.length > 0 && (
-                <ul className="list-disc list-inside text-sm">
+                <ul className='list-disc list-inside text-sm'>
                   {errorList.map((e, idx) => {
-                    const fieldKey = e.field as keyof NewLoanPayload | undefined;
-                    const label = fieldKey ? fieldLabels[fieldKey] ?? fieldKey : null;
+                    const fieldKey = e.field as
+                      | keyof NewLoanPayload
+                      | undefined;
+                    const label = fieldKey
+                      ? fieldLabels[fieldKey] ?? fieldKey
+                      : null;
                     return (
                       <li key={`${e.field ?? 'global'}-${idx}`}>
                         {label ? (
@@ -187,124 +181,93 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             </div>
           </div>
         )}
-        <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">Loan Number</span>
-            </div>
-            <input
-              type="text"
-              className={inputClass('loanNumber')}
-              value={form.loanNumber}
-              onChange={handleChange('loanNumber')}
-              placeholder="LN-011"
-              ref={loanNumberRef}
-              required
-            />
-          </label>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">Amount</span>
-            </div>
-            <input
-              type="number"
-              className={inputClass('amount')}
-              value={form.amount}
-              onChange={handleChange('amount')}
-              min={0}
-              ref={amountRef}
-              required
-            />
-          </label>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">EMI</span>
-            </div>
-            <input
-              type="number"
-              className={inputClass('emi')}
-              value={form.emi}
-              onChange={handleChange('emi')}
-              min={0}
-              ref={emiRef}
-              required
-            />
-          </label>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">Outstanding Amount</span>
-            </div>
-            <input
-              type="number"
-              className={inputClass('outstandingAmount')}
-              value={form.outstandingAmount}
-              onChange={handleChange('outstandingAmount')}
-              min={0}
-              ref={outstandingRef}
-              required
-            />
-          </label>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">Overdue Amount</span>
-            </div>
-            <input
-              type="number"
-              className={inputClass('overdueAmount')}
-              value={form.overdueAmount}
-              onChange={handleChange('overdueAmount')}
-              min={0}
-              ref={overdueRef}
-              required
-            />
-          </label>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">Start Date</span>
-            </div>
-            <input
-              type="date"
-              className={inputClass('startDate')}
-              value={form.startDate}
-              onChange={handleChange('startDate')}
-              ref={startDateRef}
-              required
-            />
-          </label>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text">End Date</span>
-            </div>
-            <input
-              type="date"
-              className={inputClass('endDate')}
-              value={form.endDate}
-              onChange={handleChange('endDate')}
-              ref={endDateRef}
-              required
-            />
-          </label>
-          <div className="md:col-span-2 flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => {
-                reset();
-                onClose();
-              }}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? <span className="loading loading-spinner" /> : 'Create Loan'}
-            </button>
-          </div>
+        <form className='grid gap-4 md:grid-cols-2' onSubmit={handleSubmit}>
+          {(() => {
+            type FieldName = keyof FormState & keyof NewLoanPayload;
+            const inputs: Array<{
+              name: FieldName;
+              label: string;
+              type: 'text' | 'number' | 'date';
+              placeholder?: string;
+              min?: number;
+            }> = [
+              {
+                name: 'loanNumber',
+                label: 'Loan Number',
+                type: 'text',
+                placeholder: 'LN-011',
+              },
+              { name: 'amount', label: 'Amount', type: 'number', min: 0 },
+              { name: 'emi', label: 'EMI', type: 'number', min: 0 },
+              {
+                name: 'outstandingAmount',
+                label: 'Outstanding Amount',
+                type: 'number',
+                min: 0,
+              },
+              {
+                name: 'overdueAmount',
+                label: 'Overdue Amount',
+                type: 'number',
+                min: 0,
+              },
+              { name: 'startDate', label: 'Start Date', type: 'date' },
+              { name: 'endDate', label: 'End Date', type: 'date' },
+            ];
+
+            return (
+              <>
+                {inputs.map(({ name, label, type, placeholder, min }) => (
+                  <label className='form-control' key={String(name)}>
+                    <div className='label'>
+                      <span className='label-text'>{label}</span>
+                    </div>
+                    <input
+                      type={type}
+                      className={inputClass(name as keyof NewLoanPayload)}
+                      value={form[name as keyof FormState]}
+                      onChange={handleChange(name as keyof FormState)}
+                      placeholder={placeholder}
+                      min={min}
+                      ref={(el) => {
+                        refs.current[name as keyof NewLoanPayload] = el;
+                      }}
+                      required
+                    />
+                  </label>
+                ))}
+                <div className='md:col-span-2 flex justify-end gap-2 pt-2'>
+                  <button
+                    type='button'
+                    className='btn btn-ghost'
+                    onClick={() => {
+                      reset();
+                      onClose();
+                    }}
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type='submit'
+                    className='btn btn-primary'
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <span className='loading loading-spinner' />
+                    ) : (
+                      'Create Loan'
+                    )}
+                  </button>
+                </div>
+              </>
+            );
+          })()}
         </form>
       </div>
       <form
-        method="dialog"
-        className="modal-backdrop"
+        method='dialog'
+        className='modal-backdrop'
         onSubmit={() => {
           reset();
           onClose();
