@@ -25,6 +25,3 @@ Repo/data: In-memory seed is fine, but if you plan to add internal IDs later, se
 Tooling/docs: no README/setup steps, no CORS note, no tests (tests are optional per prompt). Consider a short README with install/run commands and the /api/v1/loans endpoints.
 
 Otherwise, the structure (schema validation, route handlers, app factory) and TypeScript setup align with current Hono/TS best practices for a small assignment.
-
-
-- CODEBERG
