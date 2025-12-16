@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { HTTPException } from 'hono/http-exception';
 import { LoanService } from './loan.service.js';
 import { loanValidation, type LoanCreateDto } from './loan.schema.js';
 import { toLoanResponseDto } from './loan.dto.js';
@@ -49,15 +48,8 @@ export function createLoanRoutes(service: LoanService) {
     async (c) => {
       const loan: LoanCreateDto = c.req.valid('json');
 
-      try {
-        await service.createLoan(loan);
-        return c.json({ success: true }, 201);
-      } catch (err) {
-        if (err instanceof HTTPException) {
-          return err.getResponse();
-        }
-        throw err;
-      }
+      await service.createLoan(loan);
+      return c.json({ success: true }, 201);
     }
   );
 

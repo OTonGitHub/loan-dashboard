@@ -3,8 +3,7 @@ import { z } from 'zod';
 const loanNumberPattern = /^LN-\d+$/;
 const loanNumberMessage = 'loanNumber must look like LN-123';
 const loanNumberSchema = z
-  .string()
-  .min(1, 'loanNumber is required')
+  .string({ error: 'Loan number is required' })
   .regex(loanNumberPattern, loanNumberMessage);
 
 const dateOnly = z
@@ -14,14 +13,20 @@ const dateOnly = z
 const loanSchema = z
   .object({
     loanNumber: loanNumberSchema,
-    amount: z.coerce.number().positive('amount must be greater than 0'),
+    amount: z
+      .coerce.number({ error: 'Amount is required' })
+      .positive('Amount must be greater than 0'),
     startDate: dateOnly,
     endDate: dateOnly,
-    emi: z.coerce.number().positive('emi must be greater than 0'),
-    outstandingAmount: z.coerce
-      .number()
-      .min(0, 'outstandingAmount cannot be negative'),
-    overdueAmount: z.coerce.number().min(0, 'overdueAmount cannot be negative'),
+    emi: z
+      .coerce.number({ error: 'EMI is required' })
+      .positive('EMI must be greater than 0'),
+    outstandingAmount: z
+      .coerce.number({ error: 'Outstanding Amount is required' })
+      .min(0, 'Outstanding Amount cannot be negative'),
+    overdueAmount: z
+      .coerce.number({ error: 'Overdue Amount is required' })
+      .min(0, 'Overdue Amount cannot be negative'),
   })
   .superRefine((data, ctx) => {
     const start = new Date(data.startDate);
@@ -31,7 +36,7 @@ const loanSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['startDate'],
-        message: 'startDate must be a valid date',
+        message: 'Loan Start Date must be a valid date',
       });
     }
 
@@ -39,7 +44,7 @@ const loanSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['endDate'],
-        message: 'endDate must be a valid date',
+        message: 'Loan End Date must be a valid date',
       });
     }
 
@@ -51,7 +56,7 @@ const loanSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['endDate'],
-        message: 'endDate must be after startDate',
+        message: 'Loan\'s End Date must be after Start Date',
       });
     }
 
@@ -59,7 +64,7 @@ const loanSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['outstandingAmount'],
-        message: 'outstandingAmount cannot exceed amount',
+        message: 'Outstanding Amount cannot exceed amount',
       });
     }
 
@@ -67,7 +72,7 @@ const loanSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['overdueAmount'],
-        message: 'overdueAmount cannot exceed outstandingAmount',
+        message: 'Overdue Amount cannot exceed Outstanding Amount',
       });
     }
   });

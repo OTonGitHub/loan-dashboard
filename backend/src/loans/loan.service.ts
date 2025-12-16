@@ -1,7 +1,7 @@
-import { HTTPException } from 'hono/http-exception';
+import { v7 as uuidv7 } from 'uuid';
 import { Loan } from './loan.model.js';
 import { LoanRepository } from './loan.repo.js';
-import { v7 as uuidv7 } from 'uuid';
+import { LoanConflictError, LoanNotFoundError } from './loan.errors.js';
 
 type NewLoanInput = Omit<Loan, 'id'>;
 
@@ -16,7 +16,7 @@ export class LoanService {
   async getLoan(loanNumber: string): Promise<Loan> {
     const loan = await this.repo.findByLoanNumber(loanNumber);
     if (!loan) {
-      throw new HTTPException(404, { message: 'Loan not found' });
+      throw new LoanNotFoundError();
     }
     return loan;
   }
@@ -25,7 +25,7 @@ export class LoanService {
   async createLoan(input: NewLoanInput): Promise<void> {
     const existing = await this.repo.findByLoanNumber(input.loanNumber);
     if (existing) {
-      throw new HTTPException(409, { message: 'Loan number already exists' });
+      throw new LoanConflictError();
     }
 
     const newLoan: Loan = {
