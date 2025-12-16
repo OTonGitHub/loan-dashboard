@@ -8,18 +8,28 @@ type NewLoanDialogProps = {
   onCreate: (payload: NewLoanPayload) => Promise<void>;
 };
 
-const initialForm: NewLoanPayload = {
+type FormState = {
+  loanNumber: string;
+  amount: string;
+  startDate: string;
+  endDate: string;
+  emi: string;
+  outstandingAmount: string;
+  overdueAmount: string;
+};
+
+const initialForm: FormState = {
   loanNumber: '',
-  amount: 0,
+  amount: '',
   startDate: '',
   endDate: '',
-  emi: 0,
-  outstandingAmount: 0,
-  overdueAmount: 0,
+  emi: '',
+  outstandingAmount: '',
+  overdueAmount: '',
 };
 
 export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
-  const [form, setForm] = useState<NewLoanPayload>(initialForm);
+  const [form, setForm] = useState<FormState>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorList, setErrorList] = useState<FieldError[]>([]);
@@ -33,8 +43,8 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   const startDateRef = useRef<HTMLInputElement | null>(null);
   const endDateRef = useRef<HTMLInputElement | null>(null);
 
-  const handleChange = (field: keyof NewLoanPayload) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.type === 'number' ? Number(e.target.value) : e.target.value;
+  const handleChange = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errorField === field) {
       setErrorField(null);
@@ -74,7 +84,17 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
     setError(null);
     setSubmitting(true);
     try {
-      await onCreate(form);
+      const payload: NewLoanPayload = {
+        loanNumber: form.loanNumber,
+        amount: Number(form.amount || 0),
+        emi: Number(form.emi || 0),
+        outstandingAmount: Number(form.outstandingAmount || 0),
+        overdueAmount: Number(form.overdueAmount || 0),
+        startDate: form.startDate,
+        endDate: form.endDate,
+      };
+
+      await onCreate(payload);
       reset();
       onClose();
     } catch (err) {
