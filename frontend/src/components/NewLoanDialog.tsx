@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { NewLoanPayload } from '../types/loan';
 
 type NewLoanDialogProps = {
@@ -27,13 +27,25 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const reset = () => {
+    setForm(initialForm);
+    setError(null);
+    setSubmitting(false);
+  };
+
+  useEffect(() => {
+    if (open) {
+      reset();
+    }
+  }, [open]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
       await onCreate(form);
-      setForm(initialForm);
+      reset();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create loan');
@@ -47,6 +59,11 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
       <div className="modal-box max-w-2xl">
         <h3 className="font-semibold text-lg mb-2">New Loan</h3>
         <p className="text-sm text-base-content/70 mb-4">Create a new loan facility.</p>
+        {error && (
+          <div className="alert alert-error mb-4">
+            <span>{error}</span>
+          </div>
+        )}
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
           <label className="form-control">
             <div className="label">
@@ -138,23 +155,31 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
             />
           </label>
           <div className="md:col-span-2 flex justify-end gap-2 pt-2">
-            <button type="button" className="btn btn-ghost" onClick={onClose} disabled={submitting}>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                reset();
+                onClose();
+              }}
+              disabled={submitting}
+            >
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={submitting}>
               {submitting ? <span className="loading loading-spinner" /> : 'Create Loan'}
             </button>
           </div>
-          {error && (
-            <div className="md:col-span-2">
-              <div className="alert alert-error">
-                <span>{error}</span>
-              </div>
-            </div>
-          )}
         </form>
       </div>
-      <form method="dialog" className="modal-backdrop" onSubmit={onClose}>
+      <form
+        method="dialog"
+        className="modal-backdrop"
+        onSubmit={() => {
+          reset();
+          onClose();
+        }}
+      >
         <button>close</button>
       </form>
     </dialog>
