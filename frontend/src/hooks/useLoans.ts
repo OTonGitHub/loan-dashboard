@@ -9,6 +9,8 @@ type UseLoansResult = {
   createLoan: (payload: NewLoanPayload) => Promise<void>;
 };
 
+export type FieldError = { field?: string; message: string };
+
 type FieldedError = Error & { field?: string };
 
 const apiBase =
@@ -58,8 +60,10 @@ export function useLoans(): UseLoansResult {
         const body = await res.json().catch(() => null);
         const message = body?.message || body?.errors?.[0]?.message || 'Failed to create loan';
         const field = body?.errors?.[0]?.field as string | undefined;
-        const err = new Error(message) as FieldedError;
+        const errors = (body?.errors ?? []) as FieldError[];
+        const err = new Error(message) as FieldedError & { errors?: FieldError[] };
         err.field = field;
+        err.errors = errors;
         throw err;
       }
 

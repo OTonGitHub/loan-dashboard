@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import type { NewLoanPayload } from '../types/loan';
+import type { FieldError } from '../hooks/useLoans';
 
 type NewLoanDialogProps = {
   open: boolean;
@@ -21,6 +22,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   const [form, setForm] = useState<NewLoanPayload>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorList, setErrorList] = useState<FieldError[]>([]);
   const [errorField, setErrorField] = useState<keyof NewLoanPayload | null>(null);
 
   const loanNumberRef = useRef<HTMLInputElement | null>(null);
@@ -42,6 +44,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   const reset = () => {
     setForm(initialForm);
     setError(null);
+    setErrorList([]);
     setSubmitting(false);
     setErrorField(null);
   };
@@ -53,18 +56,17 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   }, [open]);
 
   useEffect(() => {
-    if (errorField) {
-      const refMap: Partial<Record<keyof NewLoanPayload, RefObject<HTMLInputElement | null>>> = {
-        loanNumber: loanNumberRef,
-        amount: amountRef,
-        emi: emiRef,
-        outstandingAmount: outstandingRef,
-        overdueAmount: overdueRef,
-        startDate: startDateRef,
-        endDate: endDateRef,
-      };
-      refMap[errorField]?.current?.focus();
-    }
+    if (!errorField) return;
+    const refMap: Partial<Record<keyof NewLoanPayload, RefObject<HTMLInputElement | null>>> = {
+      loanNumber: loanNumberRef,
+      amount: amountRef,
+      emi: emiRef,
+      outstandingAmount: outstandingRef,
+      overdueAmount: overdueRef,
+      startDate: startDateRef,
+      endDate: endDateRef,
+    };
+    refMap[errorField]?.current?.focus();
   }, [errorField]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,40 +82,89 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
         err && typeof err === 'object' && 'field' in err
           ? (err as { field?: keyof NewLoanPayload }).field
           : undefined;
-      setError(err instanceof Error ? err.message : 'Failed to create loan');
-      if (field) {
-        const refMap: Partial<Record<keyof NewLoanPayload, RefObject<HTMLInputElement | null>>> = {
-          loanNumber: loanNumberRef,
-          amount: amountRef,
-          emi: emiRef,
-          outstandingAmount: outstandingRef,
-          overdueAmount: overdueRef,
-          startDate: startDateRef,
-          endDate: endDateRef,
-        };
-        refMap[field]?.current?.focus();
-        setErrorField(field);
+      const errors =
+        err && typeof err === 'object' && 'errors' in err
+          ? ((err as { errors?: FieldError[] }).errors ?? [])
+          : [];
+
+      setError(errors.length > 0 ? null : err instanceof Error ? err.message : 'Failed to create loan');
+      setErrorList(errors);
+
+      const refMap: Partial<Record<keyof NewLoanPayload, RefObject<HTMLInputElement | null>>> = {
+        loanNumber: loanNumberRef,
+        amount: amountRef,
+        emi: emiRef,
+        outstandingAmount: outstandingRef,
+        overdueAmount: overdueRef,
+        startDate: startDateRef,
+        endDate: endDateRef,
+      };
+
+      const firstField = field || (errors.find((e) => e.field)?.field as keyof NewLoanPayload | undefined) || null;
+      if (firstField) {
+        setErrorField(null);
+        setTimeout(() => {
+          setErrorField(firstField);
+          refMap[firstField]?.current?.focus();
+        }, 0);
       }
     } finally {
       setSubmitting(false);
     }
   };
 
+  const errorFields = new Set(
+    errorList.map((e) => e.field).filter(Boolean) as (keyof NewLoanPayload)[]
+  );
+
   const inputClass = (field: keyof NewLoanPayload) =>
     `input input-bordered focus:outline-none ${
-      errorField === field
+      errorField === field || errorFields.has(field)
         ? 'border-error focus:border-error focus:ring-2 focus:ring-error/40'
         : 'focus:border-primary focus:ring-2 focus:ring-primary/30'
     }`;
+
+  const fieldLabels: Partial<Record<keyof NewLoanPayload, string>> = {
+    loanNumber: 'Loan number',
+    amount: 'Amount',
+    emi: 'EMI',
+    outstandingAmount: 'Outstanding amount',
+    overdueAmount: 'Overdue amount',
+    startDate: 'Start date',
+    endDate: 'End date',
+  };
 
   return (
     <dialog className="modal" open={open}>
       <div className="modal-box max-w-2xl">
         <h3 className="font-semibold text-lg mb-2">New Loan</h3>
         <p className="text-sm text-base-content/70 mb-4">Create a new loan facility.</p>
-        {error && (
+        {(error || errorList.length > 0) && (
           <div className="alert alert-error mb-4">
-            <span>{error}</span>
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold">
+                {errorList.length > 0 ? 'Please fix the fields below' : error || 'Please fix the fields below'}
+              </span>
+              {errorList.length > 0 && (
+                <ul className="list-disc list-inside text-sm">
+                  {errorList.map((e, idx) => {
+                    const fieldKey = e.field as keyof NewLoanPayload | undefined;
+                    const label = fieldKey ? fieldLabels[fieldKey] ?? fieldKey : null;
+                    return (
+                      <li key={`${e.field ?? 'global'}-${idx}`}>
+                        {label ? (
+                          <>
+                            <strong>{label}</strong>: {e.message}
+                          </>
+                        ) : (
+                          e.message
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           </div>
         )}
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
