@@ -9,6 +9,11 @@ export interface LoanRepository {
       sortDir: 'asc' | 'desc';
     }
   ): Promise<{ items: Loan[]; total: number }>;
+  getAggregates(): Promise<{
+    totalAmount: number;
+    totalOutstanding: number;
+    totalOverdue: number;
+  }>;
   findByLoanNumber(loanNumber: string): Promise<Loan | null>;
   create(loan: Loan): Promise<void>;
   deactivate(loanNumber: string): Promise<void>;

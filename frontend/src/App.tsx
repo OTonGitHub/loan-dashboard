@@ -21,6 +21,7 @@ function App() {
     sortDir,
     setPage,
     setSort,
+    summary,
   } = useLoans();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -49,7 +50,7 @@ function App() {
       </div>
 
       <main className='max-w-6xl mx-auto px-4 lg:px-0 py-8 space-y-6'>
-        <SummaryCards loans={loans} />
+        <SummaryCards loans={loans} summary={summary} />
         <LoanTable
           loans={loans}
           loading={loading}

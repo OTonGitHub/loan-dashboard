@@ -39,6 +39,11 @@ export function createLoanRoutes(service: LoanService) {
     }
   );
 
+  router.get('/summary', async (c) => {
+    const summary = await service.getAggregates();
+    return c.json(summary);
+  });
+
   router.get(
     '/:loanNumber',
     zValidator('param', loanValidation.params.loanNumber, (result, c) => {

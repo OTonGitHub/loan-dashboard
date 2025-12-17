@@ -21,6 +21,12 @@ export interface LoanPage {
   pageSize: number;
 }
 
+export interface LoanSummary {
+  totalAmount: number;
+  totalOutstanding: number;
+  totalOverdue: number;
+}
+
 export interface NewLoanPayload {
   loanNumber: string;
   amount: number;

@@ -3,6 +3,7 @@ import type {
   Loan,
   LoanPage,
   LoanSortBy,
+  LoanSummary,
   NewLoanPayload,
 } from '../types/loan';
 
@@ -21,6 +22,7 @@ type UseLoansResult = {
   createLoan: (payload: NewLoanPayload) => Promise<void>;
   deleteLoan: (loanNumber: string) => Promise<void>;
   updateLoan: (loanNumber: string, payload: NewLoanPayload) => Promise<void>;
+  summary: LoanSummary | null;
 };
 
 export type FieldError = { field?: string; message: string };
@@ -38,6 +40,7 @@ export function useLoans(): UseLoansResult {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<LoanSummary | null>(null);
 
   const fetchLoans = useCallback(async () => {
     const controller = new AbortController();
@@ -60,6 +63,17 @@ export function useLoans(): UseLoansResult {
       setLoans(data.items);
       setTotal(data.total);
       setPage(data.page);
+
+      // fetch summary in parallel (no pagination effect)
+      const summaryRes = await fetch(`${API_BASE}/loans/summary`, {
+        signal: controller.signal,
+      });
+      if (summaryRes.ok) {
+        const summaryJson = (await summaryRes.json()) as LoanSummary;
+        setSummary(summaryJson);
+      } else {
+        setSummary(null);
+      }
     } catch (err) {
       if (controller.signal.aborted) return;
       setError(err instanceof Error ? err.message : 'Failed to load loans');
@@ -176,5 +190,6 @@ export function useLoans(): UseLoansResult {
     createLoan,
     deleteLoan,
     updateLoan,
+    summary,
   };
 }

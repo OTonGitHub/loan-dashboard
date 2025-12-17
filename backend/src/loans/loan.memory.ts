@@ -1,3 +1,5 @@
+// Pretty Much Deprecated: Switched to ORM w/SQLite After Call with Mr. A
+
 import { Loan } from './loan.model.js';
 import { LoanRepository } from './loan.repo.js';
 
@@ -19,6 +21,22 @@ export class InMemoryLoanRepository implements LoanRepository {
     });
     const items = sorted.slice(offset, offset + limit);
     return { items, total: active.length };
+  }
+
+  async getAggregates(): Promise<{
+    totalAmount: number;
+    totalOutstanding: number;
+    totalOverdue: number;
+  }> {
+    const active = this.loans.filter((l) => l.isActive !== false);
+    return active.reduce(
+      (acc, loan) => ({
+        totalAmount: acc.totalAmount + loan.amount,
+        totalOutstanding: acc.totalOutstanding + loan.outstandingAmount,
+        totalOverdue: acc.totalOverdue + loan.overdueAmount,
+      }),
+      { totalAmount: 0, totalOutstanding: 0, totalOverdue: 0 }
+    );
   }
 
   async findByLoanNumber(loanNumber: string): Promise<Loan | null> {

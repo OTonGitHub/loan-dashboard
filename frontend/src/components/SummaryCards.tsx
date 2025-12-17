@@ -1,4 +1,4 @@
-import type { Loan } from '../types/loan';
+import type { Loan, LoanSummary } from '../types/loan';
 
 const formatCurrency = (value: number) =>
   value.toLocaleString('en-MV', {
@@ -9,10 +9,11 @@ const formatCurrency = (value: number) =>
 
 type SummaryCardsProps = {
   loans: Loan[];
+  summary?: LoanSummary | null;
 };
 
-export function SummaryCards({ loans }: SummaryCardsProps) {
-  const summary = loans.reduce(
+export function SummaryCards({ loans, summary }: SummaryCardsProps) {
+  const pageSummary = loans.reduce(
     (acc, loan) => {
       acc.total += loan.amount;
       acc.outstanding += loan.outstandingAmount;
@@ -22,19 +23,25 @@ export function SummaryCards({ loans }: SummaryCardsProps) {
     { total: 0, outstanding: 0, overdue: 0 }
   );
 
+  const total = summary?.totalAmount ?? pageSummary.total;
+  const outstanding = summary?.totalOutstanding ?? pageSummary.outstanding;
+  const overdue = summary?.totalOverdue ?? pageSummary.overdue;
+
   return (
-    <section className="grid gap-4 md:grid-cols-3">
-      <div className="stat bg-base-100 shadow-sm rounded-xl">
-        <div className="stat-title text-sm">Total Sanctioned</div>
-        <div className="stat-value text-primary">{formatCurrency(summary.total)}</div>
+    <section className='grid gap-4 md:grid-cols-3'>
+      <div className='stat bg-base-100 shadow-sm rounded-xl'>
+        <div className='stat-title text-sm'>Total Sanctioned</div>
+        <div className='stat-value text-primary'>{formatCurrency(total)}</div>
       </div>
-      <div className="stat bg-base-100 shadow-sm rounded-xl">
-        <div className="stat-title text-sm">Outstanding</div>
-        <div className="stat-value text-secondary">{formatCurrency(summary.outstanding)}</div>
+      <div className='stat bg-base-100 shadow-sm rounded-xl'>
+        <div className='stat-title text-sm'>Outstanding</div>
+        <div className='stat-value text-secondary'>
+          {formatCurrency(outstanding)}
+        </div>
       </div>
-      <div className="stat bg-base-100 shadow-sm rounded-xl">
-        <div className="stat-title text-sm">Overdue</div>
-        <div className="stat-value text-error">{formatCurrency(summary.overdue)}</div>
+      <div className='stat bg-base-100 shadow-sm rounded-xl'>
+        <div className='stat-title text-sm'>Overdue</div>
+        <div className='stat-value text-error'>{formatCurrency(overdue)}</div>
       </div>
     </section>
   );

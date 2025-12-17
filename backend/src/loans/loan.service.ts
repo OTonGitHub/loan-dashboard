@@ -30,6 +30,14 @@ export class LoanService {
     return { items, total, page, pageSize };
   }
 
+  async getAggregates(): Promise<{
+    totalAmount: number;
+    totalOutstanding: number;
+    totalOverdue: number;
+  }> {
+    return this.repo.getAggregates();
+  }
+
   async getLoan(loanNumber: string): Promise<Loan> {
     const loan = await this.repo.findByLoanNumber(loanNumber);
     if (!loan) {

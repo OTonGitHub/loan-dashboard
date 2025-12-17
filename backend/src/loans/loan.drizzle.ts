@@ -1,4 +1,4 @@
-import { asc, count, desc, eq } from 'drizzle-orm';
+import { asc, count, desc, eq, sql } from 'drizzle-orm';
 import { db } from './db.client.js';
 import { loansTable } from './schema.db.js';
 import { Loan } from './loan.model.js';
@@ -50,6 +50,28 @@ export class DrizzleLoanRepository implements LoanRepository {
       .all();
 
     return { items: rows.map(rowToLoan), total: Number(totalRow?.total ?? 0) };
+  }
+
+  async getAggregates(): Promise<{
+    totalAmount: number;
+    totalOutstanding: number;
+    totalOverdue: number;
+  }> {
+    const row = await db
+      .select({
+        totalAmount: sql<number>`sum(${loansTable.amount})`,
+        totalOutstanding: sql<number>`sum(${loansTable.outstandingAmount})`,
+        totalOverdue: sql<number>`sum(${loansTable.overdueAmount})`,
+      })
+      .from(loansTable)
+      .where(eq(loansTable.isActive, 1))
+      .get();
+
+    return {
+      totalAmount: Number(row?.totalAmount ?? 0),
+      totalOutstanding: Number(row?.totalOutstanding ?? 0),
+      totalOverdue: Number(row?.totalOverdue ?? 0),
+    };
   }
 
   async findByLoanNumber(loanNumber: string): Promise<Loan | null> {

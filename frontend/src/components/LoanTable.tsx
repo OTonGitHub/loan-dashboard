@@ -34,20 +34,55 @@ export function LoanTable({
   const pageStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const pageEnd = Math.min(total, pageStart + loans.length - 1);
 
-  const sortableHeader = (
-    label: string,
-    column: LoanTableProps['sortBy']
-  ) => {
+  const sortableHeader = (label: string, column: LoanTableProps['sortBy']) => {
     const isActive = sortBy === column;
-    const arrow = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
+    const SortIcon = () => (
+      <span className='ml-1 flex flex-col items-center w-4' aria-hidden>
+        <svg
+          viewBox='0 0 24 24'
+          fill='none'
+          xmlns='http://www.w3.org/2000/svg'
+          className={`w-3 h-3 ${
+            isActive && sortDir === 'asc' ? 'opacity-100' : 'opacity-60'
+          }`}
+        >
+          <path
+            d='M6 15l6-6 6 6'
+            stroke='currentColor'
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </svg>
+        <svg
+          viewBox='0 0 24 24'
+          fill='none'
+          xmlns='http://www.w3.org/2000/svg'
+          className={`w-3 h-3 ${
+            isActive && sortDir === 'desc' ? 'opacity-100' : 'opacity-60'
+          }`}
+        >
+          <path
+            d='M18 9l-6 6-6-6'
+            stroke='currentColor'
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </svg>
+      </span>
+    );
+
     return (
       <button
-        className={`inline-flex items-center gap-1 font-semibold text-sm ${isActive ? 'text-primary' : ''}`}
+        className={`inline-flex items-center gap-1 font-semibold text-sm ${
+          isActive ? 'text-primary' : ''
+        }`}
         onClick={() => onSort?.(column)}
-        type="button"
+        type='button'
       >
         <span>{label}</span>
-        <span className='text-xs opacity-70'>{arrow}</span>
+        <SortIcon />
       </button>
     );
   };
