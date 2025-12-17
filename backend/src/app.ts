@@ -7,7 +7,7 @@ import { prettyJSON } from 'hono/pretty-json';
 import { HTTPException } from 'hono/http-exception';
 import { cors } from 'hono/cors';
 
-import { InMemoryLoanRepository } from './loans/loan.memory.js';
+import { DrizzleLoanRepository } from './loans/loan.drizzle.js';
 import { LoanService } from './loans/loan.service.js';
 import { createLoanRoutes } from './loans/loan.routes.js';
 import { LoanConflictError, LoanNotFoundError } from './loans/loan.errors.js';
@@ -15,7 +15,7 @@ import { LoanConflictError, LoanNotFoundError } from './loans/loan.errors.js';
 export function createApp() {
   const app = new Hono();
 
-  const loanRepository = new InMemoryLoanRepository();
+  const loanRepository = new DrizzleLoanRepository();
   const loanService = new LoanService(loanRepository);
 
   const allowedOrigins = (
