@@ -1,21 +1,62 @@
-## DONE
+# Loan Dashboard
 
-Align ID rules: POST currently allows any non-empty loanNumber (loan.schema.ts), but GET /:loanNumber requires LN-<digits> (loanNumberParamSchema). That mismatch will reject records created with other formats. Either add the same regex to loanSchema.loanNumber or relax the param schema so both endpoints accept the same pattern.
+TypeScript full-stack demo for loan facility management. Backend is Hono + Drizzle ORM on SQLite; frontend is React (Vite) with Tailwind/DaisyUI. Ships with seed data for a quick walkthrough.
 
-Service/HTTP coupling: LoanService throws HTTPException, tying domain to transport. Best practice is to throw a domain error (or null) and map to 404/409 in the route. Not critical for this small app, but worth noting.
+## Prerequisites
+- Node.js 20+ (tested with 20.x)
+- npm (comes with Node)
 
-CORS: no CORS middleware yet. A React frontend on another origin will be blocked. Add app.use('\*', cors()) (from hono/cors) with allowed origins/headers.
+## Quick start
+```bash
+# install deps
+npm install --prefix backend
+npm install --prefix frontend
 
-## NOT DONE
+# run backend (Hono on 0.0.0.0:3000 by default)
+npm run dev:backend
 
-Duplicate check inefficiency: craeteLoan calls findAll to check duplicates. Use findByLoanNumber instead to avoid scanning the whole list.
+# in another shell, run frontend (Vite on 5173)
+npm run dev:frontend
+```
+Or run both in one shot (same port defaults): `npm run dev` from the repo root.
 
-Add Swagger
+## Build
+- Backend: `npm run build:backend` (outputs to backend/dist)
+- Frontend: `npm run build:frontend` (outputs to frontend/dist)
 
-Tooling/docs: no README/setup steps, no CORS note, no tests (tests are optional per prompt). Consider a short README with install/run commands and the /api/v1/loans endpoints. (For this, I wanna later add a swagger page for the backend)
+## Environment
+Backend:
+- `PORT` (default 3000), `HOST` (default 0.0.0.0)
+- `ALLOWED_ORIGINS` comma-separated list for CORS (default allows localhost:5173)
+- `SQLITE_PATH` to override DB path (default `backend/data/loans.db`)
 
-## RISKS/QUIRKS
+Frontend:
+- `VITE_API_BASE` (default `http://localhost:3000/api/v1`)
 
-Soft-delete + unique loanNumber: service allows recreating a loanNumber after delete, but the DB UNIQUE constraint will reject the insert, returning a 500 instead of a 409. Consider surfacing a conflict or reactivating the existing row instead of inserting.
+## Data & migrations
+- SQLite migrations auto-run on startup.
+- Seed wipes and repopulates the `loans` table on each backend boot (dev/demo only).
 
-Startup migration/seed (db.client.ts) deletes and reseeds the loans table on every server boot. Fine for demos; avoid in production or gate with env.
+## API endpoints (base `/api/v1`)
+- `GET /loans` list with pagination/sorting (`page`, `pageSize`, `sortBy`, `sortDir`)
+- `GET /loans/summary` totals
+- `GET /loans/:loanNumber` fetch one
+- `POST /loans` create
+- `PUT /loans/:loanNumber` update (body loanNumber must match param)
+- `DELETE /loans/:loanNumber` soft delete
+
+See `.HTTP` for ready-to-run sample requests.
+
+## Tech stack
+- Backend: Hono, @hono/node-server, Drizzle ORM, SQLite (better-sqlite3), Zod
+- Frontend: React 19, Vite, Tailwind CSS v4, DaisyUI
+
+## Notes / Status
+**Not done (future)**
+- Swagger/OpenAPI docs not added.
+- Duplicate-check in service could be tightened (uses findByLoanNumber in repo; ensure conflict handling stays consistent).
+- No automated tests; `.HTTP` has manual scenarios.
+
+**Risks / quirks**
+- Soft-delete + unique loanNumber: recreating a deleted loanNumber will hit DB unique and return 500 (would ideally be 409 or reactivation).
+- Seed wipes and reloads loans table on each backend start (dev/demo only).
