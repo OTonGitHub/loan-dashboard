@@ -42,7 +42,6 @@ export function useLoans(): UseLoansResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<LoanSummary | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
 
   const fetchLoans = useCallback(async () => {
     const controller = new AbortController();
@@ -84,7 +83,7 @@ export function useLoans(): UseLoansResult {
         setLoading(false);
       }
     }
-  }, [page, pageSize, sortBy, sortDir, reloadKey]);
+  }, [page, pageSize, sortBy, sortDir]);
 
   useEffect(() => {
     fetchLoans();
@@ -100,6 +99,17 @@ export function useLoans(): UseLoansResult {
     },
     [sortBy]
   );
+
+  const refreshList = useCallback(() => {
+    const isDefault = page === 1 && sortBy === 'loanNumber' && sortDir === 'asc';
+    if (isDefault) {
+      fetchLoans();
+      return;
+    }
+    setPage(1);
+    setSortBy('loanNumber');
+    setSortDir('asc');
+  }, [fetchLoans, page, sortBy, sortDir]);
 
   const createLoan = useCallback(
     async (payload: NewLoanPayload) => {
@@ -142,9 +152,9 @@ export function useLoans(): UseLoansResult {
         const message = body?.message || 'Failed to delete loan';
         throw new Error(message);
       }
-      await fetchLoans();
+      refreshList();
     },
-    [fetchLoans]
+    [refreshList]
   );
 
   const updateLoan = useCallback(
@@ -175,13 +185,6 @@ export function useLoans(): UseLoansResult {
 
   const goToPage = useCallback((next: number) => {
     setPage(Math.max(1, Math.trunc(next)));
-  }, []);
-
-  const refreshList = useCallback(() => {
-    setPage(1);
-    setSortBy('loanNumber');
-    setSortDir('asc');
-    setReloadKey((k) => k + 1);
   }, []);
 
   return {
