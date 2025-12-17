@@ -1,0 +1,11 @@
+{
+  "name": "loan-dashboard-root",
+  "private": true,
+  "scripts": {
+    "build:backend": "npm --prefix backend run build",
+    "dev:worker": "wrangler dev ./backend/dist/worker-entry.js",
+    "build:frontend": "npm --prefix frontend run build",
+    "publish:worker": "wrangler publish",
+    "publish:pages": "npx wrangler pages publish ./frontend/dist --project-name=loan-dashboard-pages"
+  }
+}

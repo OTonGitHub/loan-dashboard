@@ -25,7 +25,11 @@ import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
 
-const app = createApp();
+const allowed = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const app = createApp(allowed.length ? allowed : undefined);
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? '0.0.0.0';
 

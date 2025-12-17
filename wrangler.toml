@@ -1,0 +1,13 @@
+name = "loan-dashboard-worker"
+main = "./backend/dist/worker-entry.js"
+compatibility_date = "2025-12-17"
+
+[build]
+# Build the backend TypeScript to `dist` before running/publishing the Worker
+command = "npm --prefix backend run build"
+
+[vars]
+# Set your frontend origin(s) here (comma-separated if needed)
+# Added Pages deploy origin(s) so CORS allows the Pages site to call the Worker.
+# You can add more origins separated by commas or use '*' (less secure).
+ALLOWED_ORIGINS = "http://localhost:5173,https://17730336.loan-dashboard.pages.dev,https://cd1b8689.loan-dashboard.pages.dev,https://1f198147.loan-dashboard.pages.dev"

@@ -12,16 +12,21 @@ import { LoanService } from './loans/loan.service.js';
 import { createLoanRoutes } from './loans/loan.routes.js';
 import { LoanConflictError, LoanNotFoundError } from './loans/loan.errors.js';
 
-export function createApp() {
+export function createApp(allowedOriginsFromEnv?: string[]) {
   const app = new Hono();
 
   const loanRepository = new InMemoryLoanRepository();
   const loanService = new LoanService(loanRepository);
 
   const allowedOrigins = (
-    process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173'
+    allowedOriginsFromEnv && allowedOriginsFromEnv.length > 0
+      ? allowedOriginsFromEnv
+      : typeof process !== 'undefined' &&
+        process.env &&
+        process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : ['http://localhost:5173', 'http://127.0.0.1:5173']
   )
-    .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
 
