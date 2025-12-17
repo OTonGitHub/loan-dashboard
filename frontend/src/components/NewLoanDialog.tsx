@@ -49,7 +49,7 @@ export function NewLoanDialog({
     }
   }, [open, initial, reset, setForm]);
 
-  const fieldLabels: Partial<Record<keyof NewLoanPayload, string>> = {
+  const fieldLabels: Record<keyof NewLoanPayload, string> = {
     loanNumber: 'Loan number',
     amount: 'Amount',
     emi: 'EMI',
@@ -58,6 +58,20 @@ export function NewLoanDialog({
     startDate: 'Start date',
     endDate: 'End date',
   };
+
+  const fields: {
+    name: keyof NewLoanPayload;
+    label: string;
+    type: 'text' | 'number' | 'date';
+  }[] = [
+    { name: 'loanNumber', label: 'Loan Number', type: 'text' },
+    { name: 'amount', label: 'Amount', type: 'number' },
+    { name: 'emi', label: 'EMI', type: 'number' },
+    { name: 'outstandingAmount', label: 'Outstanding Amount', type: 'number' },
+    { name: 'overdueAmount', label: 'Overdue Amount', type: 'number' },
+    { name: 'startDate', label: 'Start Date', type: 'date' },
+    { name: 'endDate', label: 'End Date', type: 'date' },
+  ];
 
   return (
     <dialog className='modal' open={open}>
@@ -101,29 +115,19 @@ export function NewLoanDialog({
           </div>
         )}
         <form className='grid gap-4 md:grid-cols-2' onSubmit={handleSubmit}>
-          {(
-            [
-              ['loanNumber', 'Loan Number', 'text', 'LN-011'],
-              ['amount', 'Amount', 'number'],
-              ['emi', 'EMI', 'number'],
-              ['outstandingAmount', 'Outstanding Amount', 'number'],
-              ['overdueAmount', 'Overdue Amount', 'number'],
-              ['startDate', 'Start Date', 'date'],
-              ['endDate', 'End Date', 'date'],
-            ] as const
-          ).map(([name, label, type]) => (
-            <label className='form-control' key={name}>
+          {fields.map((f) => (
+            <label className='form-control' key={f.name}>
               <div className='label'>
-                <span className='label-text'>{label}</span>
+                <span className='label-text'>{f.label}</span>
               </div>
               <input
-                type={type}
-                className={inputClass(name as keyof NewLoanPayload)}
-                value={form[name as keyof typeof form]}
-                onChange={handleChange(name as keyof typeof form)}
-                disabled={name === 'loanNumber' && Boolean(initial)}
+                type={f.type}
+                className={inputClass(f.name)}
+                value={form[f.name]}
+                onChange={handleChange(f.name)}
+                disabled={f.name === 'loanNumber' && Boolean(initial)}
                 ref={(el) => {
-                  refs.current[name as keyof NewLoanPayload] = el;
+                  refs.current[f.name] = el;
                 }}
                 required
               />

@@ -2,6 +2,8 @@ import './App.css';
 import { SummaryCards } from './components/SummaryCards';
 import { LoanTable } from './components/LoanTable';
 import { NewLoanDialog } from './components/NewLoanDialog';
+import { ConfirmDialog } from './components/ConfirmDialog';
+import { Toast } from './components/Toast';
 import { useLoans } from './hooks/useLoans';
 import { useState } from 'react';
 
@@ -102,48 +104,32 @@ function App() {
         submitLabel={editPayload ? 'Update Loan' : 'Create Loan'}
       />
 
-      <dialog
-        className={`modal ${confirmOpen ? 'modal-open' : ''}`}
+      <ConfirmDialog
         open={confirmOpen}
+        title='Confirm delete'
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          try {
+            await deleteLoan(deleteTarget);
+            setConfirmOpen(false);
+            setConfirmMessage(`Loan Number: ${deleteTarget} deleted`);
+            setTimeout(() => setConfirmMessage(null), 2500);
+          } catch (e) {
+            setConfirmMessage((e as Error).message || 'Failed to delete');
+            setTimeout(() => setConfirmMessage(null), 2500);
+          }
+        }}
       >
-        <div className='modal-box'>
-          <h3 className='font-bold text-lg'>Confirm delete</h3>
-          <p className='py-4'>
-            Are you sure you want to delete Loan Number:{' '}
-            <strong>{deleteTarget}</strong>?
-          </p>
-          <div className='modal-action'>
-            <button className='btn' onClick={() => setConfirmOpen(false)}>
-              Cancel
-            </button>
-            <button
-              className='btn btn-error'
-              onClick={async () => {
-                if (!deleteTarget) return;
-                try {
-                  await deleteLoan(deleteTarget);
-                  setConfirmOpen(false);
-                  setConfirmMessage(`Loan Number: ${deleteTarget} deleted`);
-                  setTimeout(() => setConfirmMessage(null), 2500);
-                } catch (e) {
-                  setConfirmMessage((e as Error).message || 'Failed to delete');
-                  setTimeout(() => setConfirmMessage(null), 2500);
-                }
-              }}
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      </dialog>
+        <p>
+          Are you sure you want to delete Loan Number:{' '}
+          <strong>{deleteTarget}</strong>?
+        </p>
+      </ConfirmDialog>
 
-      {confirmMessage && (
-        <dialog className='modal modal-open' open>
-          <div className='modal-box'>
-            <p>{confirmMessage}</p>
-          </div>
-        </dialog>
-      )}
+      <Toast open={Boolean(confirmMessage)}>
+        <p>{confirmMessage}</p>
+      </Toast>
     </div>
   );
 }
