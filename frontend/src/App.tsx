@@ -21,6 +21,7 @@ function App() {
     sortDir,
     setPage,
     setSort,
+    refreshList,
     summary,
   } = useLoans();
   const [modalOpen, setModalOpen] = useState(false);
@@ -63,6 +64,7 @@ function App() {
           sortDir={sortDir}
           onSort={setSort}
           onPageChange={setPage}
+          onRefresh={refreshList}
           onDelete={(loanNumber) => {
             setDeleteTarget(loanNumber);
             setConfirmOpen(true);

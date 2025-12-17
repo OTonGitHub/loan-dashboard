@@ -19,6 +19,7 @@ type UseLoansResult = {
   error: string | null;
   setPage: (page: number) => void;
   setSort: (sortBy: LoanSortBy) => void;
+  refreshList: () => void;
   createLoan: (payload: NewLoanPayload) => Promise<void>;
   deleteLoan: (loanNumber: string) => Promise<void>;
   updateLoan: (loanNumber: string, payload: NewLoanPayload) => Promise<void>;
@@ -41,6 +42,7 @@ export function useLoans(): UseLoansResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<LoanSummary | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const fetchLoans = useCallback(async () => {
     const controller = new AbortController();
@@ -82,7 +84,7 @@ export function useLoans(): UseLoansResult {
         setLoading(false);
       }
     }
-  }, [page, pageSize, sortBy, sortDir]);
+  }, [page, pageSize, sortBy, sortDir, reloadKey]);
 
   useEffect(() => {
     fetchLoans();
@@ -175,6 +177,13 @@ export function useLoans(): UseLoansResult {
     setPage(Math.max(1, Math.trunc(next)));
   }, []);
 
+  const refreshList = useCallback(() => {
+    setPage(1);
+    setSortBy('loanNumber');
+    setSortDir('asc');
+    setReloadKey((k) => k + 1);
+  }, []);
+
   return {
     loans,
     total,
@@ -187,6 +196,7 @@ export function useLoans(): UseLoansResult {
     error,
     setPage: goToPage,
     setSort,
+    refreshList,
     createLoan,
     deleteLoan,
     updateLoan,

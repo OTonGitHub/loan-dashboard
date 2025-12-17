@@ -29,17 +29,17 @@ export function SummaryCards({ loans, summary }: SummaryCardsProps) {
 
   return (
     <section className='grid gap-4 md:grid-cols-3'>
-      <div className='stat bg-base-100 shadow-sm rounded-xl'>
+      <div className='stat bg-base-100 shadow-sm rounded-xl border border-base-100'>
         <div className='stat-title text-sm'>Total Sanctioned</div>
         <div className='stat-value text-primary'>{formatCurrency(total)}</div>
       </div>
-      <div className='stat bg-base-100 shadow-sm rounded-xl'>
+      <div className='stat bg-base-100 shadow-sm rounded-xl border border-base-100'>
         <div className='stat-title text-sm'>Outstanding</div>
         <div className='stat-value text-secondary'>
           {formatCurrency(outstanding)}
         </div>
       </div>
-      <div className='stat bg-base-100 shadow-sm rounded-xl'>
+      <div className='stat bg-base-100 shadow-sm rounded-xl border border-base-100'>
         <div className='stat-title text-sm'>Overdue</div>
         <div className='stat-value text-error'>{formatCurrency(overdue)}</div>
       </div>

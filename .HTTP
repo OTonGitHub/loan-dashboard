@@ -17,8 +17,8 @@ POST {{host}}/loans
 Content-Type: application/json
 
 {
-  "loanNumber": "LN-011",
-  "amount": 1000000,
+  "loanNumber": "LN-036",
+  "amount": 10000000,
   "startDate": "2025-01-01",
   "endDate": "2027-01-01",
   "emi": 2000,

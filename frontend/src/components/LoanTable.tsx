@@ -12,6 +12,7 @@ type LoanTableProps = {
   sortDir: 'asc' | 'desc';
   onSort?: (sortBy: LoanTableProps['sortBy']) => void;
   onPageChange?: (page: number) => void;
+  onRefresh?: () => void;
   onDelete?: (loanNumber: string) => void;
   onEdit?: (loan: Loan) => void;
 };
@@ -28,6 +29,7 @@ export function LoanTable({
   sortDir,
   onSort,
   onPageChange,
+  onRefresh,
   onDelete,
   onEdit,
 }: LoanTableProps) {
@@ -97,7 +99,9 @@ export function LoanTable({
           </p>
         </div>
         <div className='flex gap-2'>
-          <button className='btn btn-outline btn-sm'>Export CSV</button>
+          <button className='btn btn-outline btn-sm' onClick={() => onRefresh?.()}>
+            Refresh
+          </button>
         </div>
       </div>
       <div className='overflow-x-auto'>
