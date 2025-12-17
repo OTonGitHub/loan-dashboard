@@ -43,8 +43,27 @@ export class LoanService {
   async deactivateLoan(loanNumber: string): Promise<void> {
     const loan = await this.repo.findByLoanNumber(loanNumber);
     if (!loan || loan.isActive === false) {
-      throw new LoanNotFoundError();
+      throw new LoanNotFoundError(`Loan ${loanNumber} not found`);
     }
     await this.repo.deactivate(loanNumber);
+  }
+
+  async updateLoan(loanNumber: string, input: NewLoanInput): Promise<void> {
+    if (input.loanNumber !== loanNumber) {
+      throw new LoanConflictError('Cannot change loanNumber via update');
+    }
+
+    const existing = await this.repo.findByLoanNumber(loanNumber);
+    if (!existing || existing.isActive === false) {
+      throw new LoanNotFoundError(`Loan ${loanNumber} not found`);
+    }
+
+    const updated: Loan = {
+      id: existing.id,
+      ...input,
+      isActive: existing.isActive,
+    };
+
+    await this.repo.update(loanNumber, updated);
   }
 }

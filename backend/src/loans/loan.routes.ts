@@ -75,5 +75,40 @@ export function createLoanRoutes(service: LoanService) {
     }
   );
 
+  router.put(
+    '/:loanNumber',
+    zValidator('param', loanValidation.params.loanNumber, (result, c) => {
+      if (!result.success) {
+        return c.json(
+          {
+            errors: result.error.issues.map((issue) => ({
+              field: issue.path.join('.') || 'loanNumber',
+              message: issue.message,
+            })),
+          },
+          400
+        );
+      }
+    }),
+    zValidator('json', loanValidation.body, (result, c) => {
+      if (!result.success) {
+        const errors = result.error.issues.map((issue) => ({
+          field: issue.path.join('.') || 'root',
+          message: issue.message,
+        }));
+        return c.json({ errors }, 400);
+      }
+    }),
+    async (c) => {
+      const { loanNumber } = c.req.valid('param');
+      const payload: LoanCreateDto = c.req.valid('json');
+      if (payload.loanNumber !== loanNumber) {
+        return c.json({ message: 'loanNumber in body must match param' }, 400);
+      }
+      await service.updateLoan(loanNumber, payload);
+      return c.json({ success: true, message: `Loan ${loanNumber} updated` });
+    }
+  );
+
   return router;
 }

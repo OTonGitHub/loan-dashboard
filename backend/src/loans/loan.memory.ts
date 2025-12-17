@@ -17,6 +17,19 @@ export class InMemoryLoanRepository implements LoanRepository {
     this.loans.push(loan);
   }
 
+  async update(loanNumber: string, loan: Loan): Promise<void> {
+    const idx = this.loans.findIndex((l) => l.loanNumber === loanNumber);
+    if (idx === -1) return;
+    // Preserve internal id and isActive unless explicitly changed by caller
+    const existing = this.loans[idx]!;
+    this.loans[idx] = {
+      ...existing,
+      ...loan,
+      id: existing.id,
+      loanNumber: existing.loanNumber,
+    };
+  }
+
   async deactivate(loanNumber: string): Promise<void> {
     const loan = this.loans.find((l) => l.loanNumber === loanNumber);
     if (loan) loan.isActive = false;

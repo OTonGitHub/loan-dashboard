@@ -5,4 +5,5 @@ export interface LoanRepository {
   findByLoanNumber(loanNumber: string): Promise<Loan | null>;
   create(loan: Loan): Promise<void>;
   deactivate(loanNumber: string): Promise<void>;
+  update(loanNumber: string, loan: Loan): Promise<void>;
 }
