@@ -1,0 +1,12 @@
+{
+  "name": "loan-dashboard-root",
+  "private": true,
+  "scripts": {
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "bash -c \"npm run dev:backend & npm run dev:frontend; wait\""
+  }
+}
