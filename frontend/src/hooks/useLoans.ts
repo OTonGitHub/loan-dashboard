@@ -1,11 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Loan, NewLoanPayload } from '../types/loan';
+import type {
+  Loan,
+  LoanPage,
+  LoanSortBy,
+  NewLoanPayload,
+} from '../types/loan';
 
 type UseLoansResult = {
   loans: Loan[];
+  total: number;
+  page: number;
+  pageSize: number;
+  sortBy: LoanSortBy;
+  sortDir: 'asc' | 'desc';
+  pageCount: number;
   loading: boolean;
   error: string | null;
-  refetch: () => Promise<void>;
+  setPage: (page: number) => void;
+  setSort: (sortBy: LoanSortBy) => void;
   createLoan: (payload: NewLoanPayload) => Promise<void>;
   deleteLoan: (loanNumber: string) => Promise<void>;
   updateLoan: (loanNumber: string, payload: NewLoanPayload) => Promise<void>;
@@ -19,6 +31,11 @@ import { API_BASE } from '../config';
 
 export function useLoans(): UseLoansResult {
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [sortBy, setSortBy] = useState<LoanSortBy>('loanNumber');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,14 +44,22 @@ export function useLoans(): UseLoansResult {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${API_BASE}/loans`, {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sortBy,
+        sortDir,
+      });
+      const res = await fetch(`${API_BASE}/loans?${params.toString()}`, {
         signal: controller.signal,
       });
       if (!res.ok) {
         throw new Error(`Request failed (${res.status})`);
       }
-      const data = (await res.json()) as Loan[];
-      setLoans(data);
+      const data = (await res.json()) as LoanPage;
+      setLoans(data.items);
+      setTotal(data.total);
+      setPage(data.page);
     } catch (err) {
       if (controller.signal.aborted) return;
       setError(err instanceof Error ? err.message : 'Failed to load loans');
@@ -43,11 +68,22 @@ export function useLoans(): UseLoansResult {
         setLoading(false);
       }
     }
-  }, []);
+  }, [page, pageSize, sortBy, sortDir]);
 
   useEffect(() => {
     fetchLoans();
   }, [fetchLoans]);
+
+  const setSort = useCallback(
+    (column: LoanSortBy) => {
+      setPage(1);
+      setSortDir((current) =>
+        column === sortBy ? (current === 'asc' ? 'desc' : 'asc') : 'asc'
+      );
+      setSortBy(column);
+    },
+    [sortBy]
+  );
 
   const createLoan = useCallback(
     async (payload: NewLoanPayload) => {
@@ -121,11 +157,22 @@ export function useLoans(): UseLoansResult {
     [fetchLoans]
   );
 
+  const goToPage = useCallback((next: number) => {
+    setPage(Math.max(1, Math.trunc(next)));
+  }, []);
+
   return {
     loans,
+    total,
+    page,
+    pageSize,
+    pageCount: Math.max(1, Math.ceil(total / pageSize)),
+    sortBy,
+    sortDir,
     loading,
     error,
-    refetch: fetchLoans,
+    setPage: goToPage,
+    setSort,
     createLoan,
     deleteLoan,
     updateLoan,

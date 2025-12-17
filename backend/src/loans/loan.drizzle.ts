@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { asc, count, desc, eq } from 'drizzle-orm';
 import { db } from './db.client.js';
 import { loansTable } from './schema.db.js';
 import { Loan } from './loan.model.js';
@@ -19,14 +19,37 @@ function rowToLoan(row: any): Loan {
 }
 
 export class DrizzleLoanRepository implements LoanRepository {
-  async findAll(): Promise<Loan[]> {
+  async findPage(params: {
+    limit: number;
+    offset: number;
+    sortBy: 'loanNumber' | 'amount' | 'outstandingAmount' | 'emi';
+    sortDir: 'asc' | 'desc';
+  }): Promise<{ items: Loan[]; total: number }> {
+    const { limit, offset, sortBy, sortDir } = params;
+    const sortColumn = {
+      loanNumber: loansTable.loanNumber,
+      amount: loansTable.amount,
+      outstandingAmount: loansTable.outstandingAmount,
+      emi: loansTable.emi,
+    }[sortBy];
+    const sorter = sortDir === 'desc' ? desc(sortColumn) : asc(sortColumn);
+
+    const totalRow = await db
+      .select({ total: count() })
+      .from(loansTable)
+      .where(eq(loansTable.isActive, 1))
+      .get();
+
     const rows = await db
       .select()
       .from(loansTable)
       .where(eq(loansTable.isActive, 1))
-      .orderBy(loansTable.loanNumber)
+      .orderBy(sorter, loansTable.loanNumber)
+      .limit(limit)
+      .offset(offset)
       .all();
-    return rows.map(rowToLoan);
+
+    return { items: rows.map(rowToLoan), total: Number(totalRow?.total ?? 0) };
   }
 
   async findByLoanNumber(loanNumber: string): Promise<Loan | null> {

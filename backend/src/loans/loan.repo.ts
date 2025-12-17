@@ -1,7 +1,14 @@
 import { Loan } from './loan.model.js';
 
 export interface LoanRepository {
-  findAll(): Promise<Loan[]>;
+  findPage(
+    params: {
+      limit: number;
+      offset: number;
+      sortBy: 'loanNumber' | 'amount' | 'outstandingAmount' | 'emi';
+      sortDir: 'asc' | 'desc';
+    }
+  ): Promise<{ items: Loan[]; total: number }>;
   findByLoanNumber(loanNumber: string): Promise<Loan | null>;
   create(loan: Loan): Promise<void>;
   deactivate(loanNumber: string): Promise<void>;

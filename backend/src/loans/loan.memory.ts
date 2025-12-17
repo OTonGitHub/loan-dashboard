@@ -2,10 +2,23 @@ import { Loan } from './loan.model.js';
 import { LoanRepository } from './loan.repo.js';
 
 export class InMemoryLoanRepository implements LoanRepository {
-  async findAll(): Promise<Loan[]> {
-    // actually synchronous, but ORM will probably be async
-    // return only active loans
-    return this.loans.filter((l) => l.isActive !== false);
+  async findPage(params: {
+    limit: number;
+    offset: number;
+    sortBy: 'loanNumber' | 'amount' | 'outstandingAmount' | 'emi';
+    sortDir: 'asc' | 'desc';
+  }): Promise<{ items: Loan[]; total: number }> {
+    const { limit, offset, sortBy, sortDir } = params;
+    const active = this.loans.filter((l) => l.isActive !== false);
+    const sorted = [...active].sort((a, b) => {
+      const lhs = a[sortBy];
+      const rhs = b[sortBy];
+      if (lhs < rhs) return sortDir === 'asc' ? -1 : 1;
+      if (lhs > rhs) return sortDir === 'asc' ? 1 : -1;
+      return a.loanNumber.localeCompare(b.loanNumber);
+    });
+    const items = sorted.slice(offset, offset + limit);
+    return { items, total: active.length };
   }
 
   async findByLoanNumber(loanNumber: string): Promise<Loan | null> {

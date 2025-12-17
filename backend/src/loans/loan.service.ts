@@ -9,8 +9,25 @@ export class LoanService {
   constructor(private readonly repo: LoanRepository) {}
 
   // QUERY
-  async getLoans(): Promise<Loan[]> {
-    return this.repo.findAll();
+  async getLoans(params: {
+    page?: number;
+    pageSize?: number;
+    sortBy?: 'loanNumber' | 'amount' | 'outstandingAmount' | 'emi';
+    sortDir?: 'asc' | 'desc';
+  }): Promise<{ items: Loan[]; total: number; page: number; pageSize: number }> {
+    const page = Math.max(1, Math.trunc(params.page ?? 1));
+    const pageSize = Math.min(50, Math.max(1, Math.trunc(params.pageSize ?? 10)));
+    const sortBy = params.sortBy ?? 'loanNumber';
+    const sortDir = params.sortDir ?? 'asc';
+
+    const { items, total } = await this.repo.findPage({
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+      sortBy,
+      sortDir,
+    });
+
+    return { items, total, page, pageSize };
   }
 
   async getLoan(loanNumber: string): Promise<Loan> {

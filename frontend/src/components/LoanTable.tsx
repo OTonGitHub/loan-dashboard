@@ -4,6 +4,14 @@ type LoanTableProps = {
   loans: Loan[];
   loading?: boolean;
   error?: string | null;
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  sortBy: 'loanNumber' | 'amount' | 'outstandingAmount' | 'emi';
+  sortDir: 'asc' | 'desc';
+  onSort?: (sortBy: LoanTableProps['sortBy']) => void;
+  onPageChange?: (page: number) => void;
   onDelete?: (loanNumber: string) => void;
   onEdit?: (loan: Loan) => void;
 };
@@ -12,9 +20,38 @@ export function LoanTable({
   loans,
   loading,
   error,
+  total,
+  page,
+  pageSize,
+  pageCount,
+  sortBy,
+  sortDir,
+  onSort,
+  onPageChange,
   onDelete,
   onEdit,
 }: LoanTableProps) {
+  const pageStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const pageEnd = Math.min(total, pageStart + loans.length - 1);
+
+  const sortableHeader = (
+    label: string,
+    column: LoanTableProps['sortBy']
+  ) => {
+    const isActive = sortBy === column;
+    const arrow = isActive ? (sortDir === 'asc' ? '▲' : '▼') : '↕';
+    return (
+      <button
+        className={`inline-flex items-center gap-1 font-semibold text-sm ${isActive ? 'text-primary' : ''}`}
+        onClick={() => onSort?.(column)}
+        type="button"
+      >
+        <span>{label}</span>
+        <span className='text-xs opacity-70'>{arrow}</span>
+      </button>
+    );
+  };
+
   return (
     <section className='bg-base-100 shadow-sm rounded-2xl overflow-hidden'>
       <div className='p-4 border-b border-base-200 flex items-center justify-between'>
@@ -33,11 +70,11 @@ export function LoanTable({
           <thead>
             <tr>
               <th>Loan #</th>
-              <th>Amount</th>
-              <th>EMI</th>
+              <th>{sortableHeader('Amount', 'amount')}</th>
+              <th>{sortableHeader('EMI', 'emi')}</th>
               <th>Start</th>
               <th>End</th>
-              <th>Outstanding</th>
+              <th>{sortableHeader('Outstanding', 'outstandingAmount')}</th>
               <th>Overdue</th>
               <th />
             </tr>
@@ -107,6 +144,27 @@ export function LoanTable({
             )}
           </tbody>
         </table>
+      </div>
+      <div className='p-4 border-t border-base-200 flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm'>
+        <div>
+          Showing {pageStart}-{pageEnd} of {total} loans
+        </div>
+        <div className='join'>
+          <button
+            className='btn btn-sm join-item'
+            onClick={() => onPageChange?.(page - 1)}
+            disabled={page <= 1}
+          >
+            Previous
+          </button>
+          <button
+            className='btn btn-sm join-item'
+            onClick={() => onPageChange?.(page + 1)}
+            disabled={page >= pageCount}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </section>
   );

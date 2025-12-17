@@ -6,8 +6,22 @@ import { useLoans } from './hooks/useLoans';
 import { useState } from 'react';
 
 function App() {
-  const { loans, loading, error, createLoan, deleteLoan, updateLoan } =
-    useLoans();
+  const {
+    loans,
+    loading,
+    error,
+    createLoan,
+    deleteLoan,
+    updateLoan,
+    total,
+    page,
+    pageSize,
+    pageCount,
+    sortBy,
+    sortDir,
+    setPage,
+    setSort,
+  } = useLoans();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [editPayload, setEditPayload] = useState<
@@ -40,6 +54,14 @@ function App() {
           loans={loans}
           loading={loading}
           error={error}
+          total={total}
+          page={page}
+          pageSize={pageSize}
+          pageCount={pageCount}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={setSort}
+          onPageChange={setPage}
           onDelete={(loanNumber) => {
             setDeleteTarget(loanNumber);
             setConfirmOpen(true);

@@ -6,7 +6,7 @@ import { loanSchema, loansTable } from './schema.db.js';
 
 type LoanDatabase = BetterSQLite3Database<typeof loanSchema>;
 
-const LOAN_COUNT = 10;
+const LOAN_COUNT = 30;
 
 function randInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -54,10 +54,8 @@ function makeLoan(index: number): typeof loansTable.$inferInsert {
 }
 
 export function seedLoans(db: LoanDatabase) {
-  const total =
-    db.select({ total: count() }).from(loansTable).all()[0]?.total ?? 0;
-  if (total > 0) return;
-
+  // TODO: DEV ONLY! DEV ONLY! DEV ONLY! DEV ONLY! DEV ONLY! DEV ONLY!!!!!
+  db.delete(loansTable).run();
   const seeds = Array.from({ length: LOAN_COUNT }, (_, i) => makeLoan(i));
   db.insert(loansTable).values(seeds).run();
 }

@@ -3,14 +3,47 @@ import { zValidator } from '@hono/zod-validator';
 import { LoanService } from './loan.service.js';
 import { loanValidation, type LoanCreateDto } from './loan.schema.js';
 import { toLoanResponseDto } from './loan.dto.js';
+import { z } from 'zod';
 
 export function createLoanRoutes(service: LoanService) {
   const router = new Hono();
 
-  router.get('/', async (c) => {
-    const loans = await service.getLoans();
-    return c.json(loans.map(toLoanResponseDto));
+  const listQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(50).default(10),
+    sortBy: z
+      .enum(['loanNumber', 'amount', 'outstandingAmount', 'emi'])
+      .default('loanNumber'),
+    sortDir: z.enum(['asc', 'desc']).default('asc'),
   });
+
+  router.get(
+    '/',
+    zValidator('query', listQuerySchema, (result, c) => {
+      if (!result.success) {
+        const errors = result.error.issues.map((issue) => ({
+          field: issue.path.join('.') || 'query',
+          message: issue.message,
+        }));
+        return c.json({ errors }, 400);
+      }
+    }),
+    async (c) => {
+      const { page, pageSize, sortBy, sortDir } = c.req.valid('query');
+      const pageResult = await service.getLoans({
+        page,
+        pageSize,
+        sortBy,
+        sortDir,
+      });
+      return c.json({
+        items: pageResult.items.map(toLoanResponseDto),
+        total: pageResult.total,
+        page: pageResult.page,
+        pageSize: pageResult.pageSize,
+      });
+    }
+  );
 
   router.get(
     '/:loanNumber',

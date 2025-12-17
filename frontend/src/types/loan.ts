@@ -12,6 +12,15 @@ export interface Loan {
   overdueDisplay: string;
 }
 
+export type LoanSortBy = 'loanNumber' | 'amount' | 'outstandingAmount' | 'emi';
+
+export interface LoanPage {
+  items: Loan[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface NewLoanPayload {
   loanNumber: string;
   amount: number;
