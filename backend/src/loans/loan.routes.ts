@@ -1,25 +1,19 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { LoanService } from './loan.service.js';
-import { loanValidation, type LoanCreateDto } from './loan.schema.js';
+import {
+  loanListQuerySchema,
+  loanValidation,
+  type LoanCreateDto,
+} from './loan.schema.js';
 import { toLoanResponseDto } from './loan.dto.js';
-import { z } from 'zod';
 
 export function createLoanRoutes(service: LoanService) {
   const router = new Hono();
 
-  const listQuerySchema = z.object({
-    page: z.coerce.number().int().min(1).default(1),
-    pageSize: z.coerce.number().int().min(1).max(50).default(10),
-    sortBy: z
-      .enum(['loanNumber', 'amount', 'outstandingAmount', 'emi'])
-      .default('loanNumber'),
-    sortDir: z.enum(['asc', 'desc']).default('asc'),
-  });
-
   router.get(
     '/',
-    zValidator('query', listQuerySchema, (result, c) => {
+    zValidator('query', loanListQuerySchema, (result, c) => {
       if (!result.success) {
         const errors = result.error.issues.map((issue) => ({
           field: issue.path.join('.') || 'query',

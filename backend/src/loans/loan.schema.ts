@@ -1,3 +1,5 @@
+// SANITIZER
+
 import { z } from 'zod';
 
 const loanNumberPattern = /^LN-\d+$/;
@@ -87,3 +89,12 @@ export const loanValidation = {
 };
 
 export type LoanCreateDto = z.output<typeof loanSchema>;
+
+export const loanListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(10),
+  sortBy: z
+    .enum(['loanNumber', 'amount', 'outstandingAmount', 'emi'])
+    .default('loanNumber'),
+  sortDir: z.enum(['asc', 'desc']).default('asc'),
+});
