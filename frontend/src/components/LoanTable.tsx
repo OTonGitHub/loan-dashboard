@@ -83,7 +83,7 @@ export function LoanTable({ loans, loading, error, onDelete }: LoanTableProps) {
                   </td>
                   <td className='text-right pr-4'>
                     <button
-                      className='btn btn-ghost btn-xs text-error'
+                      className='btn btn-ghost btn-sm text-error font-medium'
                       onClick={() => onDelete?.(loan.loanNumber)}
                     >
                       Delete
