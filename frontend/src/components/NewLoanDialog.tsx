@@ -121,6 +121,7 @@ export function NewLoanDialog({
                 className={inputClass(name as keyof NewLoanPayload)}
                 value={form[name as keyof typeof form]}
                 onChange={handleChange(name as keyof typeof form)}
+                disabled={name === 'loanNumber' && Boolean(initial)}
                 ref={(el) => {
                   refs.current[name as keyof NewLoanPayload] = el;
                 }}
