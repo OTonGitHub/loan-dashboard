@@ -6,7 +6,7 @@ import { toLoanResponseDto } from './loan.dto.js';
 
 export function createLoanRoutes(service: LoanService) {
   const router = new Hono();
-  
+
   router.get('/', async (c) => {
     const loans = await service.getLoans();
     return c.json(loans.map(toLoanResponseDto));
@@ -50,6 +50,28 @@ export function createLoanRoutes(service: LoanService) {
 
       await service.createLoan(loan);
       return c.json({ success: true }, 201);
+    }
+  );
+
+  router.delete(
+    '/:loanNumber',
+    zValidator('param', loanValidation.params.loanNumber, (result, c) => {
+      if (!result.success) {
+        return c.json(
+          {
+            errors: result.error.issues.map((issue) => ({
+              field: issue.path.join('.') || 'loanNumber',
+              message: issue.message,
+            })),
+          },
+          400
+        );
+      }
+    }),
+    async (c) => {
+      const { loanNumber } = c.req.valid('param');
+      await service.deactivateLoan(loanNumber);
+      return c.json({ success: true, message: `Loan ${loanNumber} deleted` });
     }
   );
 

@@ -4,7 +4,8 @@ import { LoanRepository } from './loan.repo.js';
 export class InMemoryLoanRepository implements LoanRepository {
   async findAll(): Promise<Loan[]> {
     // actually synchronous, but ORM will probably be async
-    return this.loans;
+    // return only active loans
+    return this.loans.filter((l) => l.isActive !== false);
   }
 
   async findByLoanNumber(loanNumber: string): Promise<Loan | null> {
@@ -14,6 +15,11 @@ export class InMemoryLoanRepository implements LoanRepository {
 
   async create(loan: Loan): Promise<void> {
     this.loans.push(loan);
+  }
+
+  async deactivate(loanNumber: string): Promise<void> {
+    const loan = this.loans.find((l) => l.loanNumber === loanNumber);
+    if (loan) loan.isActive = false;
   }
 
   private loans: Loan[] = [
@@ -26,6 +32,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 4500,
       outstandingAmount: 80000,
       overdueAmount: 0,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db5-8d6c-396cc56d6b94',
@@ -36,6 +43,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 5200,
       outstandingAmount: 200000,
       overdueAmount: 0,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db6-920d-811fa8c0eafe',
@@ -46,6 +54,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 1500,
       outstandingAmount: 20000,
       overdueAmount: 500,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db7-8f70-077556269c6a',
@@ -56,6 +65,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 3200,
       outstandingAmount: 90000,
       overdueAmount: 1200,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db7-82c1-54c327b4388d',
@@ -66,6 +76,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 2100,
       outstandingAmount: 60000,
       overdueAmount: 0,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db8-9d62-63f569eb7c2c',
@@ -76,6 +87,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 4500,
       outstandingAmount: 240000,
       overdueAmount: 0,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db9-901d-d7316a654c64',
@@ -86,6 +98,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 2700,
       outstandingAmount: 100000,
       overdueAmount: 0,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db9-8d39-00f8cc2993ed',
@@ -96,6 +109,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 1900,
       outstandingAmount: 45000,
       overdueAmount: 250,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7db9-8325-0a34f3aa8a7c',
@@ -106,6 +120,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 1400,
       outstandingAmount: 60000,
       overdueAmount: 0,
+      isActive: true,
     },
     {
       id: '018ec9b4-1962-7dba-9c08-041ea33ee2fb',
@@ -116,6 +131,7 @@ export class InMemoryLoanRepository implements LoanRepository {
       emi: 3600,
       outstandingAmount: 120000,
       overdueAmount: 800,
+      isActive: true,
     },
   ];
 }

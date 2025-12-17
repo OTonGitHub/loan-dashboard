@@ -4,4 +4,5 @@ export interface LoanRepository {
   findAll(): Promise<Loan[]>;
   findByLoanNumber(loanNumber: string): Promise<Loan | null>;
   create(loan: Loan): Promise<void>;
+  deactivate(loanNumber: string): Promise<void>;
 }

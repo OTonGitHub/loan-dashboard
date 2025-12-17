@@ -4,22 +4,25 @@ type LoanTableProps = {
   loans: Loan[];
   loading?: boolean;
   error?: string | null;
+  onDelete?: (loanNumber: string) => void;
 };
 
-export function LoanTable({ loans, loading, error }: LoanTableProps) {
+export function LoanTable({ loans, loading, error, onDelete }: LoanTableProps) {
   return (
-    <section className="bg-base-100 shadow-sm rounded-2xl overflow-hidden">
-      <div className="p-4 border-b border-base-200 flex items-center justify-between">
+    <section className='bg-base-100 shadow-sm rounded-2xl overflow-hidden'>
+      <div className='p-4 border-b border-base-200 flex items-center justify-between'>
         <div>
-          <h2 className="text-lg font-semibold">Loan Facilities</h2>
-          <p className="text-sm text-base-content/70">List of all loan facilities with repayment status.</p>
+          <h2 className='text-lg font-semibold'>Loan Facilities</h2>
+          <p className='text-sm text-base-content/70'>
+            List of all loan facilities with repayment status.
+          </p>
         </div>
-        <div className="flex gap-2">
-          <button className="btn btn-outline btn-sm">Export CSV</button>
+        <div className='flex gap-2'>
+          <button className='btn btn-outline btn-sm'>Export CSV</button>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="table table-zebra">
+      <div className='overflow-x-auto'>
+        <table className='table table-zebra'>
           <thead>
             <tr>
               <th>Loan #</th>
@@ -29,14 +32,15 @@ export function LoanTable({ loans, loading, error }: LoanTableProps) {
               <th>End</th>
               <th>Outstanding</th>
               <th>Overdue</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
                 <td colSpan={7}>
-                  <div className="flex items-center gap-2 py-6 justify-center text-sm text-base-content/70">
-                    <span className="loading loading-spinner loading-sm" />
+                  <div className='flex items-center gap-2 py-6 justify-center text-sm text-base-content/70'>
+                    <span className='loading loading-spinner loading-sm' />
                     Loading loans...
                   </div>
                 </td>
@@ -44,7 +48,7 @@ export function LoanTable({ loans, loading, error }: LoanTableProps) {
             ) : error ? (
               <tr>
                 <td colSpan={7}>
-                  <div className="alert alert-error my-4">
+                  <div className='alert alert-error my-4'>
                     <span>{error}</span>
                   </div>
                 </td>
@@ -52,13 +56,15 @@ export function LoanTable({ loans, loading, error }: LoanTableProps) {
             ) : loans.length === 0 ? (
               <tr>
                 <td colSpan={7}>
-                  <div className="py-6 text-center text-sm text-base-content/70">No loans to display.</div>
+                  <div className='py-6 text-center text-sm text-base-content/70'>
+                    No loans to display.
+                  </div>
                 </td>
               </tr>
             ) : (
               loans.map((loan) => (
                 <tr key={loan.loanNumber}>
-                  <td className="font-medium">{loan.loanNumber}</td>
+                  <td className='font-medium'>{loan.loanNumber}</td>
                   <td>{loan.amountDisplay}</td>
                   <td>{loan.emiDisplay}</td>
                   <td>{loan.startDate}</td>
@@ -66,10 +72,22 @@ export function LoanTable({ loans, loading, error }: LoanTableProps) {
                   <td>{loan.outstandingDisplay}</td>
                   <td>
                     {loan.overdueAmount > 0 ? (
-                      <span className="badge badge-error badge-outline">{loan.overdueDisplay}</span>
+                      <span className='badge badge-error badge-outline'>
+                        {loan.overdueDisplay}
+                      </span>
                     ) : (
-                      <span className="badge badge-success badge-outline">On time</span>
+                      <span className='badge badge-success badge-outline'>
+                        On time
+                      </span>
                     )}
+                  </td>
+                  <td className='text-right pr-4'>
+                    <button
+                      className='btn btn-ghost btn-xs text-error'
+                      onClick={() => onDelete?.(loan.loanNumber)}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))

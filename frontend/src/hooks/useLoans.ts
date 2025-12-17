@@ -7,6 +7,7 @@ type UseLoansResult = {
   error: string | null;
   refetch: () => Promise<void>;
   createLoan: (payload: NewLoanPayload) => Promise<void>;
+  deleteLoan: (loanNumber: string) => Promise<void>;
 };
 
 export type FieldError = { field?: string; message: string };
@@ -14,7 +15,8 @@ export type FieldError = { field?: string; message: string };
 type FieldedError = Error & { field?: string };
 
 const apiBase =
-  import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || 'http://localhost:3000/api/v1';
+  import.meta.env.VITE_API_BASE?.replace(/\/$/, '') ||
+  'http://localhost:3000/api/v1';
 
 export function useLoans(): UseLoansResult {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -26,7 +28,9 @@ export function useLoans(): UseLoansResult {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${apiBase}/loans`, { signal: controller.signal });
+      const res = await fetch(`${apiBase}/loans`, {
+        signal: controller.signal,
+      });
       if (!res.ok) {
         throw new Error(`Request failed (${res.status})`);
       }
@@ -58,10 +62,15 @@ export function useLoans(): UseLoansResult {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null);
-        const message = body?.message || body?.errors?.[0]?.message || 'Failed to create loan';
+        const message =
+          body?.message ||
+          body?.errors?.[0]?.message ||
+          'Failed to create loan';
         const field = body?.errors?.[0]?.field as string | undefined;
         const errors = (body?.errors ?? []) as FieldError[];
-        const err = new Error(message) as FieldedError & { errors?: FieldError[] };
+        const err = new Error(message) as FieldedError & {
+          errors?: FieldError[];
+        };
         err.field = field;
         err.errors = errors;
         throw err;
@@ -72,5 +81,20 @@ export function useLoans(): UseLoansResult {
     [fetchLoans]
   );
 
-  return { loans, loading, error, refetch: fetchLoans, createLoan };
+  const deleteLoan = useCallback(
+    async (loanNumber: string) => {
+      const res = await fetch(`${apiBase}/loans/${loanNumber}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const message = body?.message || 'Failed to delete loan';
+        throw new Error(message);
+      }
+      await fetchLoans();
+    },
+    [fetchLoans]
+  );
+
+  return { loans, loading, error, refetch: fetchLoans, createLoan, deleteLoan };
 }

@@ -8,4 +8,5 @@ export interface Loan {
   emi: number;
   outstandingAmount: number;
   overdueAmount: number;
+  isActive: boolean;
 }

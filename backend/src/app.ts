@@ -22,14 +22,16 @@ export function createApp() {
     '*',
     cors({
       origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-      allowMethods: ['GET', 'POST', 'OPTIONS'],
+      // allow common methods used by the frontend, including DELETE for soft-delete
+      allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowHeaders: ['Content-Type'],
     })
   );
   app.use('*', prettyJSON());
   app.route('/api/v1/loans', createLoanRoutes(loanService));
 
-  app.onError((err, c) => { // *WHEN* THIS BLOATS -> Switch Case Overflow
+  app.onError((err, c) => {
+    // *WHEN* THIS BLOATS -> Switch Case Overflow
     if (err instanceof LoanNotFoundError) {
       return c.json({ message: err.message }, 404);
     }
