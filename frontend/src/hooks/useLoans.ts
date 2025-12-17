@@ -14,9 +14,7 @@ export type FieldError = { field?: string; message: string };
 
 type FieldedError = Error & { field?: string };
 
-const apiBase =
-  import.meta.env.VITE_API_BASE?.replace(/\/$/, '') ||
-  'http://localhost:3000/api/v1';
+import { API_BASE } from '../config';
 
 export function useLoans(): UseLoansResult {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -28,7 +26,7 @@ export function useLoans(): UseLoansResult {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${apiBase}/loans`, {
+      const res = await fetch(`${API_BASE}/loans`, {
         signal: controller.signal,
       });
       if (!res.ok) {
@@ -52,7 +50,7 @@ export function useLoans(): UseLoansResult {
 
   const createLoan = useCallback(
     async (payload: NewLoanPayload) => {
-      const res = await fetch(`${apiBase}/loans`, {
+      const res = await fetch(`${API_BASE}/loans`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +81,7 @@ export function useLoans(): UseLoansResult {
 
   const deleteLoan = useCallback(
     async (loanNumber: string) => {
-      const res = await fetch(`${apiBase}/loans/${loanNumber}`, {
+      const res = await fetch(`${API_BASE}/loans/${loanNumber}`, {
         method: 'DELETE',
       });
       if (!res.ok) {

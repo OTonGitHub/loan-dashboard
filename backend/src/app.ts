@@ -18,11 +18,17 @@ export function createApp() {
   const loanRepository = new InMemoryLoanRepository();
   const loanService = new LoanService(loanRepository);
 
+  const allowedOrigins = (
+    process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173'
+  )
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   app.use(
     '*',
     cors({
-      origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-      // allow common methods used by the frontend, including DELETE for soft-delete
+      origin: allowedOrigins,
       allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowHeaders: ['Content-Type'],
     })

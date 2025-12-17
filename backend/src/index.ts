@@ -21,15 +21,17 @@ Accept both Form & Json/Query in route input, accept multiple
 
 // REFER: https://github.com/honojs/node-server
 
-import {serve} from '@hono/node-server'
+import 'dotenv/config';
+import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
 
 const app = createApp();
-const port = 3000
+const port = Number(process.env.PORT ?? 3000);
+const host = process.env.HOST ?? '0.0.0.0';
 
-console.log(`Server Running On http://localhost:${port} Yayy 🚀`)
+console.log(`Server running on ${host}:${port}`);
 
 serve({
-    fetch: app.fetch,
-    port
-})
+  fetch: app.fetch,
+  port,
+});

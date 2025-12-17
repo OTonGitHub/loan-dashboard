@@ -10,6 +10,7 @@
   "dependencies": {
     "@hono/node-server": "^1.19.7",
     "hono": "^4.11.1",
+    "dotenv": "^16.1.4",
     "uuid": "^11.0.3",
     "zod": "^4.2.0"
   },
