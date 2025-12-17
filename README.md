@@ -1,6 +1,6 @@
 # Loan Dashboard
 
-TypeScript full-stack demo for loan facility management. Backend is Hono + Drizzle ORM on SQLite; frontend is React (Vite) with Tailwind/DaisyUI. Ships with seed data for a quick walkthrough.
+TypeScript full-stack demo for loan facility management. App specifically made for SME Digital's 4-day Take-Home Exam. Backend is Hono + Drizzle ORM on SQLite; frontend is React (Vite) with Tailwind/DaisyUI. Ships with seed data for a quick walkthrough.
 
 ## Prerequisites
 - Node.js 20+ (tested with 20.x)
