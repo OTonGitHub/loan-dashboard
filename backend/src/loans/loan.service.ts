@@ -8,7 +8,6 @@ type NewLoanInput = Omit<Loan, 'id' | 'isActive'>;
 export class LoanService {
   constructor(private readonly repo: LoanRepository) {}
 
-  // QUERY
   async getLoans(params: {
     page?: number;
     pageSize?: number;
@@ -43,15 +42,12 @@ export class LoanService {
     if (!loan) {
       throw new LoanNotFoundError();
     }
-    // ensure soft-deleted loans are treated as not found
     if (loan.isActive === false) throw new LoanNotFoundError();
     return loan;
   }
 
-  // COMMAND
   async createLoan(input: NewLoanInput): Promise<void> {
     const existing = await this.repo.findByLoanNumber(input.loanNumber);
-    // Only conflict when an active loan with the same loanNumber exists.
     if (existing && existing.isActive !== false) {
       throw new LoanConflictError();
     }

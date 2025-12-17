@@ -6,6 +6,18 @@ Accept: application/json
 
 # Expected: 200 OK and a JSON array (should contain >= 10 sample loans)
 
+### Get loans (paged & sorted)
+GET {{host}}/loans?page=1&pageSize=5&sortBy=amount&sortDir=desc
+Accept: application/json
+
+# Expected: 200 OK, 5 items, sorted by amount desc
+
+### Get loans summary (totals)
+GET {{host}}/loans/summary
+Accept: application/json
+
+# Expected: 200 OK with totalAmount, totalOutstanding, totalOverdue numbers
+
 ### Get single loan (valid)
 GET {{host}}/loans/LN-001
 Accept: application/json
@@ -101,3 +113,31 @@ Content-Type: application/json
 }
 
 # Expected: 400 Bad Request (body loanNumber must match param)
+
+### Create loan (duplicate loanNumber)
+POST {{host}}/loans
+Content-Type: application/json
+
+{
+  "loanNumber": "LN-001",
+  "amount": 123000,
+  "startDate": "2024-03-01",
+  "endDate": "2026-03-01",
+  "emi": 3000,
+  "outstandingAmount": 50000,
+  "overdueAmount": 0
+}
+
+# Expected: 409 Conflict (duplicate active loanNumber)
+
+### Delete loan (soft delete)
+DELETE {{host}}/loans/LN-001
+Accept: application/json
+
+# Expected: 200 OK and message "Loan LN-001 deleted"
+
+### Get deleted loan (should 404 after delete)
+GET {{host}}/loans/LN-001
+Accept: application/json
+
+# Expected: 404 Not Found (soft-deleted)

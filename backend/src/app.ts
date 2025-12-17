@@ -37,7 +37,7 @@ export function createApp() {
   app.route('/api/v1/loans', createLoanRoutes(loanService));
 
   app.onError((err, c) => {
-    // *WHEN* THIS BLOATS -> Switch Case Overflow
+    // *WHEN* THIS BLOATS -> Switch Case Overflow | Handle Service Origin
     if (err instanceof LoanNotFoundError) {
       return c.json({ message: err.message }, 404);
     }

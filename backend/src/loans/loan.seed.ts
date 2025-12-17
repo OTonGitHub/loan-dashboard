@@ -26,7 +26,7 @@ function addMonths(date: Date, months: number) {
 
 function makeLoan(index: number): typeof loansTable.$inferInsert {
   const amount = randInt(50_000, 1_000_000);
-  const termMonths = randInt(3, 180); // 3 months to 15 years
+  const termMonths = randInt(3, 180); // 3m-15y
   const interestRate = randInt(4, 12) / 100; // simple annual interest
   const totalRepayable = amount * (1 + interestRate);
   const emi = Math.max(500, Math.round(totalRepayable / termMonths));
@@ -37,7 +37,7 @@ function makeLoan(index: number): typeof loansTable.$inferInsert {
       ? randInt(50, Math.max(50, Math.min(outstanding, Math.round(amount * 0.25))))
       : 0;
 
-  const start = randomDateWithin(365 * 2); // within the past 2 years
+  const start = randomDateWithin(365 * 2); // within past 2 years
   const end = addMonths(start, termMonths);
 
   return {
@@ -54,7 +54,7 @@ function makeLoan(index: number): typeof loansTable.$inferInsert {
 }
 
 export function seedLoans(db: LoanDatabase) {
-  // TODO: DEV ONLY! DEV ONLY! DEV ONLY! DEV ONLY! DEV ONLY! DEV ONLY!!!!!
+  // TODO: DEV ONLY!
   db.delete(loansTable).run();
   const seeds = Array.from({ length: LOAN_COUNT }, (_, i) => makeLoan(i));
   db.insert(loansTable).values(seeds).run();

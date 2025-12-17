@@ -65,7 +65,6 @@ export function useLoans(): UseLoansResult {
       setTotal(data.total);
       setPage(data.page);
 
-      // fetch summary in parallel (no pagination effect)
       const summaryRes = await fetch(`${API_BASE}/loans/summary`, {
         signal: controller.signal,
       });

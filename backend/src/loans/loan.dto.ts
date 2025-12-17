@@ -1,6 +1,5 @@
 import { Loan } from './loan.model.js';
 
-// Kept Here since Just Exam, Ideally I'd Inject From .ENV into a Helper Class
 const currencyFormatter = new Intl.NumberFormat('en-MV', {
   style: 'currency',
   currency: 'MVR',

@@ -15,8 +15,6 @@ Async auto-wrapping Await in JS is Very Annoying..
 IF using ORM, have to re-seed DB every time, which is also Annoying.
 So, in-memory Data for this Demo is much easier for Demo Purposes.
 
-Accept both Form & Json/Query in route input, accept multiple
-
 */
 
 // REFER: https://github.com/honojs/node-server

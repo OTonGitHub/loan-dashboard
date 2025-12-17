@@ -17,6 +17,5 @@ const connection = new Database(dbPath);
 
 export const db = drizzle(connection, { schema: loanSchema });
 
-// Apply migrations and seed in-process so the DB is ready on boot.
 migrate(db, { migrationsFolder: path.resolve(process.cwd(), 'drizzle') });
 seedLoans(db);
