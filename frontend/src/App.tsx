@@ -6,9 +6,13 @@ import { useLoans } from './hooks/useLoans';
 import { useState } from 'react';
 
 function App() {
-  const { loans, loading, error, createLoan, deleteLoan } = useLoans();
+  const { loans, loading, error, createLoan, deleteLoan, updateLoan } =
+    useLoans();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [editPayload, setEditPayload] = useState<
+    import('./types/loan').NewLoanPayload | null
+  >(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState<string | null>(null);
 
@@ -40,13 +44,37 @@ function App() {
             setDeleteTarget(loanNumber);
             setConfirmOpen(true);
           }}
+          onEdit={(loan) => {
+            setEditPayload({
+              loanNumber: loan.loanNumber,
+              amount: loan.amount,
+              emi: loan.emi,
+              outstandingAmount: loan.outstandingAmount,
+              overdueAmount: loan.overdueAmount,
+              startDate: loan.startDate,
+              endDate: loan.endDate,
+            });
+            setModalOpen(true);
+          }}
         />
       </main>
 
       <NewLoanDialog
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onCreate={createLoan}
+        onClose={() => {
+          setModalOpen(false);
+          setEditPayload(null);
+        }}
+        initial={editPayload ?? undefined}
+        onSubmit={async (payload) => {
+          if (editPayload) {
+            await updateLoan(payload.loanNumber, payload);
+          } else {
+            await createLoan(payload);
+          }
+        }}
+        title={editPayload ? 'Edit Loan' : 'New Loan'}
+        submitLabel={editPayload ? 'Update Loan' : 'Create Loan'}
       />
 
       <dialog
@@ -73,7 +101,6 @@ function App() {
                   setConfirmMessage(`Loan Number: ${deleteTarget} deleted`);
                   setTimeout(() => setConfirmMessage(null), 2500);
                 } catch (e) {
-                  // show simple error message - keep UI minimal
                   setConfirmMessage((e as Error).message || 'Failed to delete');
                   setTimeout(() => setConfirmMessage(null), 2500);
                 }

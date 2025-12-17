@@ -5,13 +5,23 @@ import type { NewLoanPayload } from '../types/loan';
 type NewLoanDialogProps = {
   open: boolean;
   onClose: () => void;
-  onCreate: (payload: NewLoanPayload) => Promise<void>;
+  onSubmit: (payload: NewLoanPayload) => Promise<void>;
+  initial?: NewLoanPayload;
+  title?: string;
+  submitLabel?: string;
 };
 
-
-export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
+export function NewLoanDialog({
+  open,
+  onClose,
+  onSubmit,
+  initial,
+  title = 'New Loan',
+  submitLabel = 'Create Loan',
+}: NewLoanDialogProps) {
   const {
     form,
+    setForm,
     handleChange,
     handleSubmit,
     reset,
@@ -20,11 +30,24 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
     error,
     errorList,
     inputClass,
-  } = useLoanForm(onCreate, onClose);
+  } = useLoanForm(onSubmit, onClose);
 
   useEffect(() => {
-    if (open) reset();
-  }, [open, reset]);
+    if (!open) return;
+    if (initial) {
+      setForm({
+        loanNumber: initial.loanNumber,
+        amount: String(initial.amount),
+        emi: String(initial.emi),
+        outstandingAmount: String(initial.outstandingAmount),
+        overdueAmount: String(initial.overdueAmount),
+        startDate: initial.startDate,
+        endDate: initial.endDate,
+      });
+    } else {
+      reset();
+    }
+  }, [open, initial, reset, setForm]);
 
   const fieldLabels: Partial<Record<keyof NewLoanPayload, string>> = {
     loanNumber: 'Loan number',
@@ -39,9 +62,9 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
   return (
     <dialog className='modal' open={open}>
       <div className='modal-box max-w-2xl'>
-        <h3 className='font-semibold text-lg mb-2'>New Loan</h3>
+        <h3 className='font-semibold text-lg mb-2'>{title}</h3>
         <p className='text-sm text-base-content/70 mb-4'>
-          Create a new loan facility.
+          {initial ? 'Edit loan details.' : 'Create a new loan facility.'}
         </p>
         {(error || errorList.length > 0) && (
           <div className='alert alert-error mb-4'>
@@ -125,7 +148,7 @@ export function NewLoanDialog({ open, onClose, onCreate }: NewLoanDialogProps) {
               {submitting ? (
                 <span className='loading loading-spinner' />
               ) : (
-                'Create Loan'
+                submitLabel
               )}
             </button>
           </div>

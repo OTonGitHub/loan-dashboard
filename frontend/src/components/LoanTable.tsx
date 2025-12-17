@@ -5,9 +5,16 @@ type LoanTableProps = {
   loading?: boolean;
   error?: string | null;
   onDelete?: (loanNumber: string) => void;
+  onEdit?: (loan: Loan) => void;
 };
 
-export function LoanTable({ loans, loading, error, onDelete }: LoanTableProps) {
+export function LoanTable({
+  loans,
+  loading,
+  error,
+  onDelete,
+  onEdit,
+}: LoanTableProps) {
   return (
     <section className='bg-base-100 shadow-sm rounded-2xl overflow-hidden'>
       <div className='p-4 border-b border-base-200 flex items-center justify-between'>
@@ -81,7 +88,13 @@ export function LoanTable({ loans, loading, error, onDelete }: LoanTableProps) {
                       </span>
                     )}
                   </td>
-                  <td className='text-right pr-4'>
+                  <td className='text-right pr-4 flex gap-2 justify-end'>
+                    <button
+                      className='btn btn-ghost btn-sm'
+                      onClick={() => onEdit?.(loan)}
+                    >
+                      Edit
+                    </button>
                     <button
                       className='btn btn-ghost btn-sm text-error font-medium'
                       onClick={() => onDelete?.(loan.loanNumber)}

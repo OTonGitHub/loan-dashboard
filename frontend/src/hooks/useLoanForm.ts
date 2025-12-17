@@ -81,7 +81,7 @@ export function useLoanForm(
           ? null
           : err instanceof Error
           ? err.message
-          : 'Failed to create loan'
+          : 'Failed to submit'
       );
       setErrorList(errors);
 
