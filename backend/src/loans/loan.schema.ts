@@ -15,19 +15,19 @@ const dateOnly = z
 const loanSchema = z
   .object({
     loanNumber: loanNumberSchema,
-    amount: z
-      .coerce.number({ error: 'Amount is required' })
+    amount: z.coerce
+      .number({ error: 'Amount is required' })
       .positive('Amount must be greater than 0'),
     startDate: dateOnly,
     endDate: dateOnly,
-    emi: z
-      .coerce.number({ error: 'EMI is required' })
+    emi: z.coerce
+      .number({ error: 'EMI is required' })
       .positive('EMI must be greater than 0'),
-    outstandingAmount: z
-      .coerce.number({ error: 'Outstanding Amount is required' })
+    outstandingAmount: z.coerce
+      .number({ error: 'Outstanding Amount is required' })
       .min(0, 'Outstanding Amount cannot be negative'),
-    overdueAmount: z
-      .coerce.number({ error: 'Overdue Amount is required' })
+    overdueAmount: z.coerce
+      .number({ error: 'Overdue Amount is required' })
       .min(0, 'Overdue Amount cannot be negative'),
   })
   .superRefine((data, ctx) => {
@@ -58,7 +58,15 @@ const loanSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['endDate'],
-        message: 'Loan\'s End Date must be after Start Date',
+        message: "Loan's End Date must be after Start Date",
+      });
+    }
+
+    if (data.emi > data.amount) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['emi'],
+        message: 'EMI cannot exceed Amount',
       });
     }
 
