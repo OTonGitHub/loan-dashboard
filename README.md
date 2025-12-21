@@ -1,4 +1,4 @@
-# Loan Dashboard
+# _ Loan Dashboard _
 
 TypeScript full-stack demo for loan facility management. App specifically made for SME Digital's 4-day Take-Home Exam. Ships with seed data for a quick walkthrough.
 
